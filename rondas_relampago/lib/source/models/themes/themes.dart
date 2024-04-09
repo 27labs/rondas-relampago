@@ -12,5 +12,7 @@ enum RGBThemes {
   );
 
   final Color seedColor;
-  const RGBThemes(this.seedColor);
+  const RGBThemes(
+    this.seedColor,
+  );
 }

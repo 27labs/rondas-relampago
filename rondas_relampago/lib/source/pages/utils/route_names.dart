@@ -3,6 +3,7 @@ enum RouteNames {
   casualPlay('casual'),
   casualTutorial('casual_tutorial'),
   singlePlayer('single_player'),
+  twoPlayers('two_player'),
   adsPrompt('ads_prompt');
 
   final String name;

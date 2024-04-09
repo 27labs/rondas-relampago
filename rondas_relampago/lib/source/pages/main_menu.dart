@@ -1,9 +1,10 @@
 import 'dart:io';
-import 'package:flutter/foundation.dart';
+// import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:rondas_relampago/source/pages/utils/route_names.dart';
+import 'package:rondas_relampago/source/storage/storage.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 // Owned
@@ -283,19 +284,9 @@ class _MenuThemePicker extends ConsumerWidget {
               onChanged: (
                 RGBThemes? theme,
               ) async {
-                switch (ref.read(
-                  sharedPreferencesProvider,
-                )) {
-                  case AsyncData(
-                      :final value,
-                    ):
-                    await value.setInt(
-                      'selected_theme',
-                      theme?.index ?? RGBThemes.blue.index,
-                    );
-                    break;
-                  case _:
-                }
+                await (await SharedPreferences.getInstance()).setInt(
+                    StoredValuesKeys.selectedTheme.storageKey,
+                    theme?.index ?? RGBThemes.blue.index);
                 ref.invalidate(
                   selectedThemeProvider,
                 );
@@ -326,65 +317,65 @@ class _AdSection extends ConsumerWidget {
     context,
     ref,
   ) =>
-      kDebugMode || !(Platform.isAndroid || Platform.isIOS)
-          ? const SizedBox()
-          : Platform.isAndroid
-              ? Column(
-                  children: [
-                    Expanded(
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        mainAxisSize: MainAxisSize.max,
+      Expanded(
+        child:
+            // kDebugMode ||
+            !(Platform.isAndroid || Platform.isIOS)
+                ? const SizedBox()
+                : Platform.isAndroid
+                    ? Column(
                         children: [
-                          SizedBox(
-                            // width: AdSize.mediumRectangle.width.toDouble(),
-                            height: 350,
-                            child: ref
-                                    .watch(
-                                      preloadedAdsProvider,
-                                    )
-                                    .ads
-                                    .nativePlatform
-                                    .isNotEmpty
-                                ? AdWidget(
-                                    ad: ref
-                                        .watch(
-                                          preloadedAdsProvider,
-                                        )
-                                        .ads
-                                        .nativePlatform
-                                        .last,
-                                  )
-                                : null,
-                          ),
-                          const SizedBox(
-                            width: 20,
-                          ),
-                          Center(
-                            child: IconButton(
-                              iconSize: 25,
-                              onPressed: () {
-                                showDialog(
-                                  context: context,
-                                  builder: (innerContext) =>
-                                      const ContentPromptDialog(),
-                                );
-                              },
-                              icon: Icon(
-                                Icons.refresh_rounded,
-                                color: Theme.of(
-                                  context,
-                                ).primaryColor,
-                              ),
+                          Expanded(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              mainAxisSize: MainAxisSize.max,
+                              children: [
+                                SizedBox(
+                                    width:
+                                        AdSize.mediumRectangle.width.toDouble(),
+                                    height: 350,
+                                    child: ref
+                                            .watch(
+                                              preloadedNativeAdsProvider,
+                                            )
+                                            .isNotEmpty
+                                        ? AdWidget(
+                                            ad: ref
+                                                .watch(
+                                                  preloadedNativeAdsProvider,
+                                                )
+                                                .last,
+                                          )
+                                        : null),
+                                const SizedBox(
+                                  width: 20,
+                                ),
+                                Center(
+                                  child: IconButton(
+                                    iconSize: 25,
+                                    onPressed: () {
+                                      showDialog(
+                                        context: context,
+                                        builder: (innerContext) =>
+                                            const ContentPromptDialog(),
+                                      );
+                                    },
+                                    icon: Icon(
+                                      Icons.refresh_rounded,
+                                      color: Theme.of(
+                                        context,
+                                      ).primaryColor,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
+                          _gap,
                         ],
-                      ),
-                    ),
-                    _gap,
-                  ],
-                )
-              : const SizedBox();
+                      )
+                    : const SizedBox(),
+      );
 }
 
 class _GameStatistics extends ConsumerWidget {
@@ -428,15 +419,12 @@ class _GameStatistics extends ConsumerWidget {
             ),
             Text(
                 switch (ref.watch(
-                  sharedPreferencesProvider,
+                  casualWinsProvider,
                 )) {
                   AsyncData(
                     :final value,
                   ) =>
-                    value.getInt(
-                          'casual_wins',
-                        ) ??
-                        0,
+                    value,
                   _ => 0
                 }
                     .toString(),

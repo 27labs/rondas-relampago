@@ -104,13 +104,13 @@ class AudioController {
   }
 
   Future<void> toggleMusic(WidgetRef ref) async {
-    final soundState = switch (ref.read(sharedPreferencesProvider)) {
-      AsyncData(:final value) => switch (
-            value.getBool(StoredValuesKeys.soundVolume.storageKey)) {
-          false => GameAudioSettings.soundOff,
-          _ => GameAudioSettings.soundOn,
-        },
-      _ => GameAudioSettings.soundOn
+    final storage = await SharedPreferences.getInstance();
+
+    final soundState = switch (storage.getBool(
+      StoredValuesKeys.soundVolume.storageKey,
+    )) {
+      false => GameAudioSettings.soundOff,
+      _ => GameAudioSettings.soundOn,
     };
 
     final newSoundState = soundState.muted
@@ -118,10 +118,8 @@ class AudioController {
         : GameAudioSettings.soundOff;
     _mutedHandler(setting: newSoundState);
 
-    // while (ref.watch(sharedPreferencesProvider).isLoading) {}
-
-    await (ref.read(sharedPreferencesProvider).requireValue)
-        .setBool(StoredValuesKeys.soundVolume.storageKey, !newSoundState.muted);
+    storage.setBool(
+        StoredValuesKeys.soundVolume.storageKey, !newSoundState.muted);
 
     ref.invalidate(soundVolumeProvider);
   }

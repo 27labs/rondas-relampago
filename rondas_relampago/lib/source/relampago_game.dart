@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:flutter/foundation.dart';
+// import 'package:flutter/foundation.dart';
 import "package:flutter/material.dart";
 import 'package:go_router/go_router.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -10,7 +10,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:rondas_relampago/source/models/ads/ads.dart';
 import 'package:rondas_relampago/source/models/app_lifecycle/app_lifecycle.dart';
 import 'package:rondas_relampago/source/models/themes/themes.dart';
-// import 'package:rondas_relampago/source/models/themes/themes.dart';
 import 'package:rondas_relampago/source/pages/ads_requirements.dart';
 import 'package:rondas_relampago/source/pages/casual_singleplayer/match.dart';
 import 'package:rondas_relampago/source/pages/casual_singleplayer/tutorial.dart';
@@ -32,7 +31,8 @@ class Relampago extends ConsumerWidget {
           _,
           __,
         ) =>
-            !kDebugMode && (Platform.isAndroid || Platform.isIOS)
+            // !kDebugMode &&
+            (Platform.isAndroid || Platform.isIOS)
                 ? AdsController.adCategorySelected == null
                     ? const AdsRequirementsScreen()
                     : const MainMenu()
@@ -64,6 +64,15 @@ class Relampago extends ConsumerWidget {
           __,
         ) =>
             const CasualMatch(),
+      ),
+      GoRoute(
+        name: RouteNames.twoPlayers.name,
+        path: '/casual/twoplayer',
+        builder: (
+          _,
+          __,
+        ) =>
+            const CasualMatch(multiplayer: true),
       ),
       // GoRoute(
       //   name: RouteNames.casualPlay.name,
@@ -112,10 +121,11 @@ class Relampago extends ConsumerWidget {
     _,
     ref,
   ) {
-    if (!kDebugMode && (Platform.isAndroid || Platform.isIOS))
-      ref.read(
-        preloadedAdsProvider,
-      );
+    if (
+        // !kDebugMode &&
+        (Platform.isAndroid || Platform.isIOS)) {
+      PreloadedAds.initProviders(ref);
+    }
     return AppLifecycleObserver(
       audioController: ref.watch(
         audioControllerProvider,
@@ -123,9 +133,7 @@ class Relampago extends ConsumerWidget {
       child: SafeArea(
         child: MaterialApp.router(
           title: '¡Rondas Relámpago!',
-          localizationsDelegates: const [
-            AppLocalizations.delegate,
-          ],
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           theme: ThemeData(
             textTheme: GoogleFonts.lexendTextTheme(),

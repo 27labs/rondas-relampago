@@ -9,20 +9,35 @@ import 'package:rondas_relampago/source/models/themes/themes.dart';
 import 'package:rondas_relampago/source/storage/storage.dart';
 part 'providers.g.dart';
 
-@riverpod
-Future<SharedPreferences> sharedPreferences(
-  SharedPreferencesRef ref,
-) async =>
-    await SharedPreferences.getInstance();
+// @riverpod
+// Future<SharedPreferences> sharedPreferences(
+//   SharedPreferencesRef ref,
+// ) async =>
+//     await SharedPreferences.getInstance();
+
+// @riverpod
+// PreloadedAds preloadedAds(
+//   PreloadedAdsRef ref,
+// ) =>
+//     PreloadedAds();
 
 @riverpod
-PreloadedAds preloadedAds(
-  PreloadedAdsRef ref,
+List<NativeAd> preloadedNativeAds(
+  PreloadedNativeAdsRef ref,
 ) =>
-    PreloadedAds()
-      ..preloadSingleAd(
-        AdKind.nativePlatform,
-      );
+    PreloadedAds.ads.nativePlatform;
+
+@riverpod
+List<BannerAd> preloadedAdaptiveAds(
+  PreloadedAdaptiveAdsRef ref,
+) =>
+    PreloadedAds.ads.adaptiveBanner;
+
+@riverpod
+List<BannerAd> preloadedMediumAds(
+  PreloadedMediumAdsRef ref,
+) =>
+    PreloadedAds.ads.mediumRectangleBanner;
 
 @riverpod
 AudioController audioController(
@@ -77,5 +92,19 @@ Future<RGBThemes> selectedTheme(
           RGBThemes.values[value.getInt(
                 StoredValuesKeys.selectedTheme.storageKey,
               ) ??
-              0],
+              RGBThemes.blue.index],
+    );
+
+@riverpod
+Future<int> casualWins(
+  CasualWinsRef ref,
+) async =>
+    await SharedPreferences.getInstance().then(
+      (
+        value,
+      ) =>
+          value.getInt(
+            StoredValuesKeys.casualWins.storageKey,
+          ) ??
+          0,
     );

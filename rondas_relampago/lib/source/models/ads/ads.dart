@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:rondas_relampago/source/pages/utils/providers.dart';
 export 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'ads_secrets.dart';
 
@@ -19,42 +20,48 @@ class AdsController {
   static bool? get adCategorySelected => _adCategorySelected;
 
   static Future<void> limitAds() async {
-    if (!kDebugMode && (Platform.isAndroid || Platform.isIOS))
-      await MobileAds.instance.updateRequestConfiguration(
-          RequestConfiguration(maxAdContentRating: MaxAdContentRating.g));
+    if (
+        // !kDebugMode &&
+        (Platform.isAndroid || Platform.isIOS))
+      await MobileAds.instance.updateRequestConfiguration(RequestConfiguration(
+        maxAdContentRating: MaxAdContentRating.g,
+      ));
     _adCategorySelected = false;
   }
 
   static Future<void> unlimitAds() async {
-    if (!kDebugMode && (Platform.isAndroid || Platform.isIOS))
-      await MobileAds.instance.updateRequestConfiguration(
-          RequestConfiguration(maxAdContentRating: MaxAdContentRating.t));
+    if (
+        // !kDebugMode &&
+        (Platform.isAndroid || Platform.isIOS))
+      await MobileAds.instance.updateRequestConfiguration(RequestConfiguration(
+        maxAdContentRating: MaxAdContentRating.t,
+      ));
     _adCategorySelected = true;
   }
 }
 
 class PreloadedAds {
-  AdStore _ads =
+  static AdStore _ads =
       (nativePlatform: [], mediumRectangleBanner: [], adaptiveBanner: []);
 
-  ({
+  static ({
     int nativePlatform,
     int mediumRectangleBanner,
     int adaptiveBanner
   }) _maxAmountOfAds =
       (nativePlatform: 1, mediumRectangleBanner: 0, adaptiveBanner: 1);
 
-  Duration _initializationTimeout = const Duration(seconds: 3);
+  static Duration _initializationTimeout = const Duration(seconds: 3);
 
-  Duration get initializationTimeout => _initializationTimeout;
+  static Duration get initializationTimeout => _initializationTimeout;
 
-  set initializationTimeout(Duration timeout) =>
+  static set initializationTimeout(Duration timeout) =>
       _initializationTimeout = timeout;
 
-  ({int nativePlatform, int mediumRectangleBanner, int adaptiveBanner})
+  static ({int nativePlatform, int mediumRectangleBanner, int adaptiveBanner})
       get preloadedAmountLimits => _maxAmountOfAds;
 
-  set preloadedAmountLimits(
+  static set preloadedAmountLimits(
       ({
         int? nativePlatform,
         int? mediumRectangleBanner,
@@ -79,9 +86,9 @@ class PreloadedAds {
     );
   }
 
-  AdStore get ads => _ads;
+  static AdStore get ads => _ads;
 
-  String add(Ad ad, [AdKind? adKind]) {
+  static String add(Ad ad, [AdKind? adKind]) {
     final adType = switch (ad) {
       NativeAd _ => AdKind.nativePlatform,
       BannerAd _ => switch (ad.size) {
@@ -101,16 +108,28 @@ class PreloadedAds {
         if (_ads.nativePlatform.length < _maxAmountOfAds.nativePlatform) {
           _ads.nativePlatform.add(ad as NativeAd);
           return "Native Ad loaded.";
+        } else {
+          _ads.nativePlatform.add(ad as NativeAd);
+          _ads.nativePlatform.removeAt(0);
+          return "Native Ad loaded.";
         }
       case AdKind.mediumRectangleBanner:
         if (_ads.mediumRectangleBanner.length <
             _maxAmountOfAds.mediumRectangleBanner) {
           _ads.mediumRectangleBanner.add((ad as BannerAd));
           return "Medium Banner Ad loaded.";
+        } else {
+          _ads.mediumRectangleBanner.add((ad as BannerAd));
+          _ads.mediumRectangleBanner.removeAt(0);
+          return "Medium Banner Ad loaded.";
         }
       case AdKind.adaptiveBanner:
         if (_ads.adaptiveBanner.length < _maxAmountOfAds.adaptiveBanner) {
           _ads.adaptiveBanner.add(ad as BannerAd);
+          return "Adaptive Banner Ad loaded.";
+        } else {
+          _ads.adaptiveBanner.add(ad as BannerAd);
+          _ads.adaptiveBanner.removeAt(0);
           return "Adaptive Banner Ad loaded.";
         }
       default:
@@ -118,7 +137,7 @@ class PreloadedAds {
     return "Invalid ad wasn't added.";
   }
 
-  void removeAt(int index, AdKind adKind) {
+  static void removeAt(int index, AdKind adKind) {
     switch (adKind) {
       case AdKind.nativePlatform:
         if (index >= 0 && index < _ads.nativePlatform.length)
@@ -132,51 +151,105 @@ class PreloadedAds {
     }
   }
 
-  Future<void> preloadSingleAd(AdKind adKind) async {
-    bool loaded = false;
-
+  static Future<void> preloadSingleAd(AdKind adKind, WidgetRef ref) async {
     const adRequest = AdRequest();
 
     switch (adKind) {
       case AdKind.nativePlatform:
-        NativeAd(
-            nativeTemplateStyle:
-                NativeTemplateStyle(templateType: TemplateType.medium),
-            adUnitId: kDebugMode
-                ? DevelopmentAdsUnitId.nativePlatform.unitId
-                : ReleaseAdsUnitId.nativePlatform.unitId,
-            request: adRequest,
-            listener: NativeAdListener(onAdLoaded: (ad) {
-              debugPrint(add(ad as NativeAd, AdKind.nativePlatform));
-              loaded = true;
-            })).load();
+        await (NativeAd(
+          nativeTemplateStyle: NativeTemplateStyle(
+            templateType: TemplateType.medium,
+          ),
+          adUnitId: kDebugMode
+              ? DevelopmentAdsUnitId.nativePlatform.unitId
+              : ReleaseAdsUnitId.nativePlatform.unitId,
+          request: adRequest,
+          listener: NativeAdListener(
+            onAdLoaded: (ad) {
+              debugPrint(
+                add(
+                  ad as NativeAd,
+                  AdKind.nativePlatform,
+                ),
+              );
+              ref.invalidate(
+                preloadedNativeAdsProvider,
+              );
+            },
+          ),
+        )).load();
         break;
       case AdKind.adaptiveBanner:
-        BannerAd(
-            adUnitId: kDebugMode
-                ? DevelopmentAdsUnitId.adaptiveBanner.unitId
-                : ReleaseAdsUnitId.adaptiveBanner.unitId,
-            request: adRequest,
-            size: AdSize.banner,
-            listener: BannerAdListener(onAdLoaded: (ad) {
-              debugPrint(add(ad as BannerAd, AdKind.adaptiveBanner));
-              loaded = true;
-            })).load();
+        await (BannerAd(
+          adUnitId: kDebugMode
+              ? DevelopmentAdsUnitId.adaptiveBanner.unitId
+              : ReleaseAdsUnitId.adaptiveBanner.unitId,
+          request: adRequest,
+          size: AdSize.banner,
+          listener: BannerAdListener(
+            onAdLoaded: (ad) {
+              debugPrint(
+                add(
+                  ad as BannerAd,
+                  AdKind.adaptiveBanner,
+                ),
+              );
+              ref.invalidate(
+                preloadedAdaptiveAdsProvider,
+              );
+            },
+          ),
+        )).load();
         break;
       case AdKind.mediumRectangleBanner:
-        BannerAd(
-            adUnitId: kDebugMode
-                ? DevelopmentAdsUnitId.mediumRectangleBanner.unitId
-                : ReleaseAdsUnitId.mediumRectangleBanner.unitId,
-            request: adRequest,
-            size: AdSize.mediumRectangle,
-            listener: BannerAdListener(onAdLoaded: (ad) {
-              debugPrint(add(ad as BannerAd, AdKind.mediumRectangleBanner));
-              loaded = true;
-            })).load();
+        await (BannerAd(
+          adUnitId: kDebugMode
+              ? DevelopmentAdsUnitId.mediumRectangleBanner.unitId
+              : ReleaseAdsUnitId.mediumRectangleBanner.unitId,
+          request: adRequest,
+          size: AdSize.mediumRectangle,
+          listener: BannerAdListener(
+            onAdLoaded: (ad) {
+              debugPrint(
+                add(
+                  ad as BannerAd,
+                  AdKind.mediumRectangleBanner,
+                ),
+              );
+              ref.invalidate(
+                preloadedMediumAdsProvider,
+              );
+            },
+          ),
+        )).load();
         break;
     }
 
-    while (!loaded) {}
+    // while (!loaded) {}
   }
+
+  static void initProviders(WidgetRef ref) {
+    // ref.read(
+    //   preloadedAdsProvider,
+    // );
+    ref.read(
+      preloadedNativeAdsProvider,
+    );
+    ref.read(
+      preloadedAdaptiveAdsProvider,
+    );
+    ref.read(
+      preloadedMediumAdsProvider,
+    );
+    preloadSingleAd(
+      AdKind.nativePlatform,
+      ref,
+    );
+  }
+
+  static void drain() => _ads = (
+        nativePlatform: [],
+        mediumRectangleBanner: [],
+        adaptiveBanner: [],
+      );
 }

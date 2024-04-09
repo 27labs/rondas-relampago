@@ -1,4 +1,5 @@
 import 'dart:io';
+// import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -54,12 +55,11 @@ class ScreenTitleSolo extends ConsumerWidget {
             ),
             Expanded(
               child: (Platform.isAndroid || Platform.isIOS) &&
+                      // !kDebugMode &&
                       ref
                           .watch(
-                            preloadedAdsProvider,
+                            preloadedAdaptiveAdsProvider,
                           )
-                          .ads
-                          .adaptiveBanner
                           .isNotEmpty
                   ? Padding(
                       padding: const EdgeInsets.symmetric(
@@ -71,10 +71,8 @@ class ScreenTitleSolo extends ConsumerWidget {
                         child: AdWidget(
                           ad: ref
                               .watch(
-                                preloadedAdsProvider,
+                                preloadedAdaptiveAdsProvider,
                               )
-                              .ads
-                              .adaptiveBanner
                               .last,
                         ),
                       ),

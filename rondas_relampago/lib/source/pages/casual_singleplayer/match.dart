@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 
@@ -18,10 +17,25 @@ enum CasualMatchStage {
   results,
 }
 
+enum CasualMatchTwoPlayerStage {
+  p1UnitPlacement,
+  p2UnitPlacement,
+  p1MarkerPlacement,
+  p2MarkerPlacement,
+  results,
+}
+
 class CasualMatch extends StatefulWidget {
-  const CasualMatch({super.key});
+  final bool multiplayer;
+  const CasualMatch({
+    this.multiplayer = false,
+    super.key,
+  });
   @override
-  State<CasualMatch> createState() => CasualMatchState();
+  State<CasualMatch> createState() => switch (multiplayer) {
+        false => CasualMatchState(),
+        true => CasualMatchMultiplayerState(),
+      };
 }
 
 class CasualMatchState extends State<CasualMatch> {
@@ -60,7 +74,9 @@ class CasualMatchState extends State<CasualMatch> {
     context,
   ) =>
       Scaffold(
-        backgroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
+        backgroundColor: Theme.of(
+          context,
+        ).colorScheme.onPrimaryContainer,
         body: switch (_stage) {
           CasualMatchStage.unitPlacement => Column(
               children: [
@@ -112,7 +128,10 @@ class CasualMatchState extends State<CasualMatch> {
                   (
                     CasualMatchUnits,
                     CasualMatchMarkers,
-                  )>.microtask(
+                  )>.delayed(
+                const Duration(
+                  milliseconds: 200,
+                ),
                 () {
                   const GameBoardSize boardSize = GameBoardSize.small;
                   CasualMatchUnits units = const CasualMatchUnits(
@@ -257,6 +276,195 @@ class CasualMatchState extends State<CasualMatch> {
                             playerTwoUnits: units,
                             playerTwoMarkers: markers,
                           ),
+                        _ => _data,
+                      },
+                      onDone: () => context.pop(),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+        },
+      );
+}
+
+class CasualMatchMultiplayerState extends State<CasualMatch> {
+  CasualMatchTwoPlayerStage _stage = CasualMatchTwoPlayerStage.p1UnitPlacement;
+
+  CasualMatchData _data = const CasualMatchData();
+
+  void _updateUnits<CasualMatchUnits>({
+    required covariant unitsState,
+  }) {
+    setState(
+      () {
+        _data = switch (_stage) {
+          CasualMatchTwoPlayerStage.p1UnitPlacement => CasualMatchData.copyWith(
+              _data,
+              playerOneUnits: unitsState,
+            ),
+          CasualMatchTwoPlayerStage.p2UnitPlacement => CasualMatchData.copyWith(
+              _data,
+              playerTwoUnits: unitsState,
+            ),
+          _ => _data,
+        };
+      },
+    );
+  }
+
+  void _updateMarkers<CasualMatchMarkers>({
+    required covariant markersState,
+  }) {
+    setState(
+      () {
+        _data = switch (_stage) {
+          CasualMatchTwoPlayerStage.p1MarkerPlacement =>
+            CasualMatchData.copyWith(
+              _data,
+              playerOneMarkers: markersState,
+            ),
+          CasualMatchTwoPlayerStage.p2MarkerPlacement =>
+            CasualMatchData.copyWith(
+              _data,
+              playerTwoMarkers: markersState,
+            ),
+          _ => _data,
+        };
+      },
+    );
+  }
+
+  @override
+  Widget build(
+    context,
+  ) =>
+      Scaffold(
+        backgroundColor: Theme.of(
+          context,
+        ).colorScheme.onPrimaryContainer,
+        body: switch (_stage) {
+          CasualMatchTwoPlayerStage.p1UnitPlacement => Column(
+              children: [
+                ScreenTitleSolo(
+                  AppLocalizations.of(
+                    context,
+                  )!
+                      .p1PlacingTitle,
+                ),
+                Expanded(
+                  child: UnitPlacementView(
+                    GameBoardSize.small,
+                    unitsState: _data.data.playerOneUnits,
+                    onChange: _updateUnits,
+                    onDone: () => setState(
+                      () {
+                        _stage = CasualMatchTwoPlayerStage.p2UnitPlacement;
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          CasualMatchTwoPlayerStage.p2UnitPlacement => Column(
+              children: [
+                ScreenTitleSolo(
+                  AppLocalizations.of(
+                    context,
+                  )!
+                      .p2PlacingTitle,
+                ),
+                Expanded(
+                  child: UnitPlacementView(
+                    GameBoardSize.small,
+                    unitsState: _data.data.playerTwoUnits,
+                    onChange: _updateUnits,
+                    onDone: () => setState(
+                      () {
+                        _stage = CasualMatchTwoPlayerStage.p1MarkerPlacement;
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          CasualMatchTwoPlayerStage.p1MarkerPlacement => Column(
+              children: [
+                ScreenTitleSolo(
+                  AppLocalizations.of(
+                    context,
+                  )!
+                      .p1GuessingTitle,
+                ),
+                Expanded(
+                  child: MarkerPlacementView(
+                    GameBoardSize.small,
+                    4,
+                    markersState: _data.data.playerOneMarkers,
+                    onChange: _updateMarkers,
+                    onDone: () => setState(
+                      () {
+                        _stage = CasualMatchTwoPlayerStage.p2MarkerPlacement;
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          CasualMatchTwoPlayerStage.p2MarkerPlacement => Column(
+              children: [
+                ScreenTitleSolo(
+                  AppLocalizations.of(
+                    context,
+                  )!
+                      .p2GuessingTitle,
+                ),
+                Expanded(
+                  child: MarkerPlacementView(
+                    GameBoardSize.small,
+                    4,
+                    markersState: _data.data.playerTwoMarkers,
+                    onChange: _updateMarkers,
+                    onDone: () => setState(
+                      () {
+                        _stage = CasualMatchTwoPlayerStage.results;
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          CasualMatchTwoPlayerStage.results => FutureBuilder(
+              future: Future<
+                  (
+                    CasualMatchUnits,
+                    CasualMatchMarkers,
+                  )?>.delayed(
+                const Duration(
+                  milliseconds: 200,
+                ),
+                () {
+                  return null;
+                },
+              ),
+              builder: (
+                _,
+                snapshot,
+              ) =>
+                  Column(
+                children: [
+                  ScreenTitleSolo(
+                    AppLocalizations.of(
+                      context,
+                    )!
+                        .resultsTitle,
+                    showingResults: true,
+                  ),
+                  Expanded(
+                    child: ResultsView(
+                      GameBoardSize.small,
+                      isPlayingSolo: true,
+                      matchData: switch (snapshot.data) {
                         _ => _data,
                       },
                       onDone: () => context.pop(),

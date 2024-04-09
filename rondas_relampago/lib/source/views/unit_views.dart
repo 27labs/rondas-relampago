@@ -97,7 +97,11 @@ class UnitPlacementViewState extends State<UnitPlacementView> {
           y: y,
         );
 
-        if (widget.unitsState.hitBoxes.intersection(newUnit.hitBox).isEmpty) {
+        if (widget.unitsState.hitBoxes
+            .intersection(
+              newUnit.hitBox,
+            )
+            .isEmpty) {
           newUnitsState = MatchUnits.add(
             widget.unitsState,
             newUnit,
@@ -106,8 +110,18 @@ class UnitPlacementViewState extends State<UnitPlacementView> {
           newUnitsState = widget.unitsState;
         }
       }
-      widget.onChange(
-        unitsState: newUnitsState,
+
+      setState(
+        () {
+          if (!newUnitsState.missingSizes.contains(
+                _selectedSize,
+              ) &&
+              newUnitsState.missingSizes.isNotEmpty)
+            _selectedSize = newUnitsState.missingSizes.first;
+          widget.onChange(
+            unitsState: newUnitsState,
+          );
+        },
       );
     }
 

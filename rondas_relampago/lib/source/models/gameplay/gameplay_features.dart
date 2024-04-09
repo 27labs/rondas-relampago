@@ -15,6 +15,8 @@ sealed class MatchUnits {
 
   Set<GameUnitSize?> get sizes;
 
+  List<GameUnitSize> get missingSizes;
+
   bool get isFull;
 
   Set<GameMarker> get hitBoxes;
@@ -62,6 +64,15 @@ class CasualMatchUnits implements MatchUnits {
     if (_data.$1 != null) units.add(_data.$1!);
     if (_data.$2 != null) units.add(_data.$2!);
     if (_data.$3 != null) units.add(_data.$3!);
+    return units;
+  }
+
+  @override
+  List<GameUnitSize> get missingSizes {
+    List<GameUnitSize> units = [];
+    if (_data.$1 == null) units.add(GameUnitSize.large);
+    if (_data.$2 == null) units.add(GameUnitSize.medium);
+    if (_data.$3 == null) units.add(GameUnitSize.small);
     return units;
   }
 
@@ -234,134 +245,3 @@ typedef MatchMarkers = Set<GameMarker>;
 class OutOfBoundsException implements Exception {}
 
 class MarkersLimitReachedException implements Exception {}
-
-// Old
-
-// enum GameRound { first, second, last }
-
-// enum GameStage {
-//   tutorial,
-//   playerOnePlacement,
-//   playerTwoPlacement,
-//   playerOneTargeting,
-//   playerTwoTargeting,
-//   results,
-//   error
-// }
-
-// class CompetitiveModePlayerUnits {
-//   Set<GameUnit> _roundOneUnits = {};
-//   Set<GameUnit> _roundTwoUnits = {};
-//   Set<GameUnit> _roundThreeUnits = {};
-
-//   void addGameUnit(GameRound round, GameUnit unit) {
-//     switch (round) {
-//       case GameRound.first:
-//         _roundOneUnits.add(unit);
-//         break;
-//       case GameRound.second:
-//         _roundTwoUnits.add(unit);
-//         break;
-//       case GameRound.last:
-//         _roundThreeUnits.add(unit);
-//         break;
-//     }
-//   }
-
-//   void removeGameUnit(GameRound round, GameUnit unit) {
-//     switch (round) {
-//       case GameRound.first:
-//         _roundOneUnits.remove(unit);
-//         break;
-//       case GameRound.second:
-//         _roundTwoUnits.remove(unit);
-//         break;
-//       case GameRound.last:
-//         _roundThreeUnits.remove(unit);
-//         break;
-//     }
-//   }
-
-//   Set<GameUnit> get roundOneUnits => _roundOneUnits;
-//   Set<GameUnit> get roundTwoUnits => _roundTwoUnits;
-//   Set<GameUnit> get roundThreeUnits => _roundThreeUnits;
-
-//   Set<GameUnit> fromRound(GameRound round) {
-//     switch (round) {
-//       case GameRound.first:
-//         return _roundOneUnits;
-//       case GameRound.second:
-//         return _roundTwoUnits;
-//       case GameRound.last:
-//         return _roundThreeUnits;
-//     }
-//   }
-// }
-
-// class CompetitiveModePlayerTargets {
-//   Set<String> _roundOneTargets = {};
-//   Set<String> _roundTwoTargets = {};
-//   Set<String> _roundThreeTargets = {};
-
-//   // void addGameTarget(GameRound round, {required int x, required int y}) {
-//   //   switch (round) {
-//   //     case GameRound.first:
-//   //       _roundOneTargets.add('$x-$y');
-//   //       break;
-//   //     case GameRound.second:
-//   //       _roundTwoTargets.add('$x-$y');
-//   //       break;
-//   //     case GameRound.last:
-//   //       _roundThreeTargets.add('$x-$y');
-//   //       break;
-//   //   }
-//   // }
-
-//   int get amountOfTargets =>
-//       _roundOneTargets.length +
-//       _roundTwoTargets.length +
-//       _roundThreeTargets.length;
-
-//   void addGameTarget(GameRound round, String target) {
-//     switch (round) {
-//       case GameRound.first:
-//         _roundOneTargets.add(target);
-//         break;
-//       case GameRound.second:
-//         _roundTwoTargets.add(target);
-//         break;
-//       case GameRound.last:
-//         _roundThreeTargets.add(target);
-//         break;
-//     }
-//   }
-
-//   void removeGameTarget(GameRound round, {required int x, required int y}) {
-//     switch (round) {
-//       case GameRound.first:
-//         _roundOneTargets.remove('$x-$y');
-//         break;
-//       case GameRound.second:
-//         _roundTwoTargets.remove('$x-$y');
-//         break;
-//       case GameRound.last:
-//         _roundThreeTargets.remove('$x-$y');
-//         break;
-//     }
-//   }
-
-//   Set<String> get roundOneTargets => _roundOneTargets;
-//   Set<String> get roundTwoTargets => _roundTwoTargets;
-//   Set<String> get roundThreeTargets => _roundThreeTargets;
-
-//   Set<String> fromRound(GameRound round) {
-//     switch (round) {
-//       case GameRound.first:
-//         return _roundOneTargets;
-//       case GameRound.second:
-//         return _roundTwoTargets;
-//       case GameRound.last:
-//         return _roundThreeTargets;
-//     }
-//   }
-// }
