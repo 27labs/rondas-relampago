@@ -6,7 +6,7 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/widgets.dart';
 
 // Owned
-import 'package:rondas_relampago/source/pages/utils/providers.dart';
+// import 'package:rondas_relampago/source/pages/utils/providers.dart';
 import 'package:rondas_relampago/source/storage/storage.dart';
 
 /// Allows playing music and sound. A facade to `package:audioplayers`.
@@ -103,10 +103,10 @@ class AudioController {
     await _musicPlayer.pause();
   }
 
-  Future<void> toggleMusic(WidgetRef ref) async {
-    final storage = await SharedPreferences.getInstance();
+  Future<void> toggleMusic(SharedPreferences? storage) async {
+    // final storage = await SharedPreferences.getInstance();
 
-    final soundState = switch (storage.getBool(
+    final soundState = switch (storage?.getBool(
       StoredValuesKeys.soundVolume.storageKey,
     )) {
       false => GameAudioSettings.soundOff,
@@ -118,10 +118,8 @@ class AudioController {
         : GameAudioSettings.soundOff;
     _mutedHandler(setting: newSoundState);
 
-    storage.setBool(
+    storage?.setBool(
         StoredValuesKeys.soundVolume.storageKey, !newSoundState.muted);
-
-    ref.invalidate(soundVolumeProvider);
   }
 }
 

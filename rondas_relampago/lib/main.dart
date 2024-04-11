@@ -1,7 +1,6 @@
 import 'dart:io';
 // import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Owned
 import 'source/relampago_game.dart';
@@ -44,8 +43,6 @@ void main() async {
   // await SharedPreferences.getInstance()
   //     .then((value) async => await value.remove(key));
   runApp(
-    ProviderScope(
-      child: Relampago(),
-    ),
+    Relampago(),
   );
 }

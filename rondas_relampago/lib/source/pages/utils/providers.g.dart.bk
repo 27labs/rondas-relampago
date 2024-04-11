@@ -1,0 +1,131 @@
+// GENERATED CODE - DO NOT MODIFY BY HAND
+
+part of 'providers.dart';
+
+// **************************************************************************
+// RiverpodGenerator
+// **************************************************************************
+
+String _$preloadedNativeAdsHash() =>
+    r'c0e92a35b7faf7ecfce50e3cf86e13f4a688b99c';
+
+/// See also [preloadedNativeAds].
+@ProviderFor(preloadedNativeAds)
+final preloadedNativeAdsProvider = AutoDisposeProvider<List<NativeAd>>.internal(
+  preloadedNativeAds,
+  name: r'preloadedNativeAdsProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$preloadedNativeAdsHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+typedef PreloadedNativeAdsRef = AutoDisposeProviderRef<List<NativeAd>>;
+String _$preloadedAdaptiveAdsHash() =>
+    r'45cdcdd887998d08e2460c0868a45d3a0611b322';
+
+/// See also [preloadedAdaptiveAds].
+@ProviderFor(preloadedAdaptiveAds)
+final preloadedAdaptiveAdsProvider =
+    AutoDisposeProvider<List<BannerAd>>.internal(
+  preloadedAdaptiveAds,
+  name: r'preloadedAdaptiveAdsProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$preloadedAdaptiveAdsHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+typedef PreloadedAdaptiveAdsRef = AutoDisposeProviderRef<List<BannerAd>>;
+String _$preloadedMediumAdsHash() =>
+    r'eac6ba99029fdedddcbe83cbb1de02ff8a769013';
+
+/// See also [preloadedMediumAds].
+@ProviderFor(preloadedMediumAds)
+final preloadedMediumAdsProvider = AutoDisposeProvider<List<BannerAd>>.internal(
+  preloadedMediumAds,
+  name: r'preloadedMediumAdsProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$preloadedMediumAdsHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+typedef PreloadedMediumAdsRef = AutoDisposeProviderRef<List<BannerAd>>;
+String _$audioControllerHash() => r'9de8a9cfa7329569fbcb3145f6b33fabad9886fe';
+
+/// See also [audioController].
+@ProviderFor(audioController)
+final audioControllerProvider = AutoDisposeProvider<AudioController>.internal(
+  audioController,
+  name: r'audioControllerProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$audioControllerHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+typedef AudioControllerRef = AutoDisposeProviderRef<AudioController>;
+String _$soundVolumeHash() => r'dd0fb72cac4a1a021fc5dea280ec7df1e2533f17';
+
+/// See also [soundVolume].
+@ProviderFor(soundVolume)
+final soundVolumeProvider = AutoDisposeProvider<bool>.internal(
+  soundVolume,
+  name: r'soundVolumeProvider',
+  debugGetCreateSourceHash:
+      const bool.fromEnvironment('dart.vm.product') ? null : _$soundVolumeHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+typedef SoundVolumeRef = AutoDisposeProviderRef<bool>;
+String _$savedVolumeHash() => r'596b260aec410ca6023f855748f1a42b70b21120';
+
+/// See also [savedVolume].
+@ProviderFor(savedVolume)
+final savedVolumeProvider = AutoDisposeFutureProvider<bool>.internal(
+  savedVolume,
+  name: r'savedVolumeProvider',
+  debugGetCreateSourceHash:
+      const bool.fromEnvironment('dart.vm.product') ? null : _$savedVolumeHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+typedef SavedVolumeRef = AutoDisposeFutureProviderRef<bool>;
+String _$selectedThemeHash() => r'd29acc413bdc88f4614e7b9708bddc014d2d23f6';
+
+/// See also [selectedTheme].
+@ProviderFor(selectedTheme)
+final selectedThemeProvider = AutoDisposeFutureProvider<RGBThemes>.internal(
+  selectedTheme,
+  name: r'selectedThemeProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$selectedThemeHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+typedef SelectedThemeRef = AutoDisposeFutureProviderRef<RGBThemes>;
+String _$casualWinsHash() => r'e1cb549c5e76da64a1c1bb9326c65bf43008b605';
+
+/// See also [casualWins].
+@ProviderFor(casualWins)
+final casualWinsProvider = AutoDisposeFutureProvider<int>.internal(
+  casualWins,
+  name: r'casualWinsProvider',
+  debugGetCreateSourceHash:
+      const bool.fromEnvironment('dart.vm.product') ? null : _$casualWinsHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+typedef CasualWinsRef = AutoDisposeFutureProviderRef<int>;
+// ignore_for_file: type=lint
+// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member

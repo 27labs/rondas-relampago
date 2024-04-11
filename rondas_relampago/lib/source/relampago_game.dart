@@ -5,19 +5,23 @@ import "package:flutter/material.dart";
 import 'package:go_router/go_router.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 
 // Owned
 import 'package:rondas_relampago/source/models/ads/ads.dart';
 import 'package:rondas_relampago/source/models/app_lifecycle/app_lifecycle.dart';
+import 'package:rondas_relampago/source/models/audio/audio_controller.dart';
 import 'package:rondas_relampago/source/models/themes/themes.dart';
 import 'package:rondas_relampago/source/pages/ads_requirements.dart';
 import 'package:rondas_relampago/source/pages/casual_singleplayer/match.dart';
 import 'package:rondas_relampago/source/pages/casual_singleplayer/tutorial.dart';
 import 'package:rondas_relampago/source/pages/main_menu.dart';
-import 'package:rondas_relampago/source/pages/utils/providers.dart';
+import 'package:rondas_relampago/source/pages/utils/change_notifiers.dart';
+// import 'package:rondas_relampago/source/pages/utils/providers.dart';
 import 'package:rondas_relampago/source/pages/utils/route_names.dart';
+import 'package:rondas_relampago/source/storage/storage.dart';
 
-class Relampago extends ConsumerWidget {
+class Relampago extends StatelessWidget {
   Relampago({
     super.key,
   });
@@ -72,7 +76,9 @@ class Relampago extends ConsumerWidget {
           _,
           __,
         ) =>
-            const CasualMatch(multiplayer: true),
+            const CasualMatch(
+          multiplayer: true,
+        ),
       ),
       // GoRoute(
       //   name: RouteNames.casualPlay.name,
@@ -119,44 +125,100 @@ class Relampago extends ConsumerWidget {
   @override
   Widget build(
     _,
-    ref,
   ) {
     if (
         // !kDebugMode &&
         (Platform.isAndroid || Platform.isIOS)) {
-      PreloadedAds.initProviders(ref);
+      // PreloadedAds.initProviders(ref);
     }
-    return AppLifecycleObserver(
-      audioController: ref.watch(
-        audioControllerProvider,
-      ),
-      child: SafeArea(
-        child: MaterialApp.router(
-          title: '¡Rondas Relámpago!',
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
-          theme: ThemeData(
-            textTheme: GoogleFonts.lexendTextTheme(),
-            colorScheme: ColorScheme.fromSeed(
-              // brightness: Brightness.dark,
-              seedColor: switch (ref.watch(
-                selectedThemeProvider,
-              )) {
-                AsyncData(
-                  :final value,
-                ) =>
-                  value,
-                _ => RGBThemes.blue
-              }
-                  .seedColor,
-            ).copyWith(
-              primary: Colors.amber,
+    return FutureBuilder(
+        future: SharedPreferences.getInstance(),
+        builder: (
+          _,
+          snapshot,
+        ) {
+          return ValueListenableBuilder(
+            valueListenable: ValueNotifier(
+              RelampagoState(
+                (
+                  nativeAds: <NativeAd>[],
+                  adaptiveAds: <BannerAd>[],
+                  audioController: AudioController()
+                    ..initialize(
+                      switch (snapshot.data?.getBool(
+                        StoredValuesKeys.soundVolume.storageKey,
+                      )) {
+                        false => GameAudioSettings.soundOff,
+                        true => GameAudioSettings.soundOn,
+                        null => GameAudioSettings.soundOn,
+                      },
+                    ),
+                  sharedPreferences: snapshot.data
+                ),
+              ),
             ),
-            useMaterial3: true,
-          ),
-          routerConfig: _router,
-        ),
-      ),
-    );
+            builder: (
+              _,
+              listenable,
+              ___,
+            ) =>
+                MultiProvider(
+              providers: [
+                Provider.value(
+                  value: listenable.state!.nativeAds,
+                ),
+                Provider.value(
+                  value: listenable.state!.adaptiveAds,
+                ),
+                Provider.value(
+                  value: listenable.state!.audioController,
+                ),
+                Provider.value(
+                  value: listenable.state!.sharedPreferences,
+                ),
+                Provider.value(
+                  value: () {
+                    listenable.invalidate();
+                    return StateUpdaterNotification.done;
+                  },
+                  // updateShouldNotify: (previous, current) => false,
+                ),
+                Provider.value(
+                  value: RGBThemes.values[
+                      listenable.state!.sharedPreferences?.getInt(
+                            StoredValuesKeys.selectedTheme.storageKey,
+                          ) ??
+                          RGBThemes.blue.index],
+                ),
+              ],
+              builder: (
+                context,
+                __,
+              ) =>
+                  AppLifecycleObserver(
+                audioController: listenable.state!.audioController,
+                child: SafeArea(
+                  child: MaterialApp.router(
+                    title: '¡Rondas Relámpago!',
+                    localizationsDelegates:
+                        AppLocalizations.localizationsDelegates,
+                    supportedLocales: AppLocalizations.supportedLocales,
+                    theme: ThemeData(
+                      textTheme: GoogleFonts.lexendTextTheme(),
+                      colorScheme: ColorScheme.fromSeed(
+                        // brightness: Brightness.dark,
+                        seedColor: Provider.of<RGBThemes>(context).seedColor,
+                      ).copyWith(
+                        primary: Colors.amber,
+                      ),
+                      useMaterial3: true,
+                    ),
+                    routerConfig: _router,
+                  ),
+                ),
+              ),
+            ),
+          );
+        });
   }
 }

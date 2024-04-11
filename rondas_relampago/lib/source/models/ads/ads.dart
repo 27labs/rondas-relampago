@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:rondas_relampago/source/pages/utils/providers.dart';
+// import 'package:rondas_relampago/source/pages/utils/providers.dart';
 export 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'ads_secrets.dart';
 
@@ -151,7 +151,7 @@ class PreloadedAds {
     }
   }
 
-  static Future<void> preloadSingleAd(AdKind adKind, WidgetRef ref) async {
+  static Future<void> preloadSingleAd(AdKind adKind, List<Ad> adList) async {
     const adRequest = AdRequest();
 
     switch (adKind) {
@@ -166,15 +166,11 @@ class PreloadedAds {
           request: adRequest,
           listener: NativeAdListener(
             onAdLoaded: (ad) {
-              debugPrint(
-                add(
-                  ad as NativeAd,
-                  AdKind.nativePlatform,
-                ),
+              adList.add(
+                ad as NativeAd,
+                // AdKind.nativePlatform,
               );
-              ref.invalidate(
-                preloadedNativeAdsProvider,
-              );
+              debugPrint("Native Ad loaded.");
             },
           ),
         )).load();
@@ -188,15 +184,11 @@ class PreloadedAds {
           size: AdSize.banner,
           listener: BannerAdListener(
             onAdLoaded: (ad) {
-              debugPrint(
-                add(
-                  ad as BannerAd,
-                  AdKind.adaptiveBanner,
-                ),
+              adList.add(
+                ad as BannerAd,
+                // AdKind.nativePlatform,
               );
-              ref.invalidate(
-                preloadedAdaptiveAdsProvider,
-              );
+              debugPrint("Banner Ad loaded.");
             },
           ),
         )).load();
@@ -210,15 +202,11 @@ class PreloadedAds {
           size: AdSize.mediumRectangle,
           listener: BannerAdListener(
             onAdLoaded: (ad) {
-              debugPrint(
-                add(
-                  ad as BannerAd,
-                  AdKind.mediumRectangleBanner,
-                ),
+              adList.add(
+                ad as BannerAd,
+                // AdKind.nativePlatform,
               );
-              ref.invalidate(
-                preloadedMediumAdsProvider,
-              );
+              debugPrint("Banner Ad loaded.");
             },
           ),
         )).load();
@@ -228,24 +216,24 @@ class PreloadedAds {
     // while (!loaded) {}
   }
 
-  static void initProviders(WidgetRef ref) {
-    // ref.read(
-    //   preloadedAdsProvider,
-    // );
-    ref.read(
-      preloadedNativeAdsProvider,
-    );
-    ref.read(
-      preloadedAdaptiveAdsProvider,
-    );
-    ref.read(
-      preloadedMediumAdsProvider,
-    );
-    preloadSingleAd(
-      AdKind.nativePlatform,
-      ref,
-    );
-  }
+  // static void initProviders(WidgetRef ref) {
+  //   // ref.read(
+  //   //   preloadedAdsProvider,
+  //   // );
+  //   ref.read(
+  //     preloadedNativeAdsProvider,
+  //   );
+  //   ref.read(
+  //     preloadedAdaptiveAdsProvider,
+  //   );
+  //   ref.read(
+  //     preloadedMediumAdsProvider,
+  //   );
+  //   preloadSingleAd(
+  //     AdKind.nativePlatform,
+  //     ref,
+  //   );
+  // }
 
   static void drain() => _ads = (
         nativePlatform: [],

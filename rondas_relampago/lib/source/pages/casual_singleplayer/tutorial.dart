@@ -2,15 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 // import 'package:rondas_relampago/source/models/ads/ads.dart';
 
 // Owner
 import 'package:rondas_relampago/source/models/themes/themes.dart';
-import 'package:rondas_relampago/source/pages/utils/providers.dart';
+// import 'package:rondas_relampago/source/pages/utils/providers.dart';
 import 'package:rondas_relampago/source/pages/utils/route_names.dart';
 import 'package:rondas_relampago/source/pages/utils/screen_title.dart';
+import 'package:rondas_relampago/source/storage/storage.dart';
 
-class TutorialForCasual extends ConsumerWidget {
+class TutorialForCasual extends StatelessWidget {
   const TutorialForCasual({
     super.key,
   });
@@ -18,7 +20,6 @@ class TutorialForCasual extends ConsumerWidget {
   @override
   Widget build(
     BuildContext context,
-    ref,
   ) {
     const gap = SizedBox(
       height: 30,
@@ -214,15 +215,13 @@ class TutorialForCasual extends ConsumerWidget {
                         5.0,
                       ),
                     ),
-                    color: switch (ref.watch(
-                      selectedThemeProvider,
-                    )) {
-                      AsyncData(
-                        :final value,
-                      ) =>
-                        value,
-                      _ => RGBThemes.blue
-                    }
+                    color: RGBThemes
+                        .values[Provider.of<SharedPreferences?>(
+                              context,
+                            )?.getInt(
+                              StoredValuesKeys.selectedTheme.storageKey,
+                            ) ??
+                            RGBThemes.blue.index]
                         .seedColor,
                   ),
                   margin: const EdgeInsets.fromLTRB(

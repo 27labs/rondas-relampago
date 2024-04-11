@@ -3,12 +3,15 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:provider/provider.dart';
 
 // Owned
 import 'package:rondas_relampago/source/models/ads/ads.dart';
-import 'package:rondas_relampago/source/pages/utils/providers.dart';
+import 'package:rondas_relampago/source/models/audio/audio_controller.dart';
+// import 'package:rondas_relampago/source/pages/utils/providers.dart';
+import 'package:rondas_relampago/source/storage/storage.dart';
 
-class ScreenTitleSolo extends ConsumerWidget {
+class ScreenTitleSolo extends StatelessWidget {
   final String title;
   final bool showingResults;
   const ScreenTitleSolo(
@@ -20,7 +23,6 @@ class ScreenTitleSolo extends ConsumerWidget {
   @override
   Widget build(
     BuildContext context,
-    ref,
   ) {
     if (context.canPop() && !showingResults) {
       return ConstrainedBox(
@@ -56,11 +58,9 @@ class ScreenTitleSolo extends ConsumerWidget {
             Expanded(
               child: (Platform.isAndroid || Platform.isIOS) &&
                       // !kDebugMode &&
-                      ref
-                          .watch(
-                            preloadedAdaptiveAdsProvider,
-                          )
-                          .isNotEmpty
+                      Provider.of<List<BannerAd>>(
+                        context,
+                      ).isNotEmpty
                   ? Padding(
                       padding: const EdgeInsets.symmetric(
                         vertical: 15,
@@ -69,11 +69,9 @@ class ScreenTitleSolo extends ConsumerWidget {
                         height: AdSize.banner.height.toDouble(),
                         width: AdSize.banner.width.toDouble(),
                         child: AdWidget(
-                          ad: ref
-                              .watch(
-                                preloadedAdaptiveAdsProvider,
-                              )
-                              .last,
+                          ad: Provider.of<List<BannerAd>>(
+                            context,
+                          ).last,
                         ),
                       ),
                     )
@@ -97,13 +95,15 @@ class ScreenTitleSolo extends ConsumerWidget {
             ),
             TextButton(
               onPressed: () {
-                ref
-                    .read(
-                      audioControllerProvider,
-                    )
-                    .toggleMusic(
-                      ref,
-                    );
+                Provider.of<AudioController>(
+                  context,
+                  listen: false,
+                ).toggleMusic(
+                  Provider.of<SharedPreferences?>(
+                    context,
+                    listen: false,
+                  ),
+                );
               },
               child: Container(
                 padding: const EdgeInsets.fromLTRB(
@@ -113,9 +113,14 @@ class ScreenTitleSolo extends ConsumerWidget {
                   10,
                 ),
                 child: Icon(
-                  ref.watch(
-                    soundVolumeProvider,
-                  )
+                  // Provider.of<SharedPreferences?>(
+                  //           context,
+                  //         )?.getBool(
+                  //           StoredValuesKeys.soundVolume.storageKey,
+                  //         ) ??
+                  Provider.of<AudioController>(
+                    context,
+                  ).sound.muted
                       ? Icons.music_off_outlined
                       : Icons.music_note_outlined,
                   semanticLabel: AppLocalizations.of(
@@ -168,13 +173,15 @@ class ScreenTitleSolo extends ConsumerWidget {
           ),
           TextButton(
             onPressed: () {
-              ref
-                  .read(
-                    audioControllerProvider,
-                  )
-                  .toggleMusic(
-                    ref,
-                  );
+              Provider.of<AudioController>(
+                context,
+                listen: false,
+              ).toggleMusic(
+                Provider.of<SharedPreferences?>(
+                  context,
+                  listen: false,
+                ),
+              );
             },
             child: Container(
               padding: const EdgeInsets.fromLTRB(
@@ -184,9 +191,14 @@ class ScreenTitleSolo extends ConsumerWidget {
                 10,
               ),
               child: Icon(
-                ref.watch(
-                  soundVolumeProvider,
-                )
+                // Provider.of<SharedPreferences?>(
+                //           context,
+                //         )?.getBool(
+                //           StoredValuesKeys.soundVolume.storageKey,
+                //         ) ??
+                Provider.of<AudioController>(
+                  context,
+                ).sound.muted
                     ? Icons.music_off_outlined
                     : Icons.music_note_outlined,
                 semanticLabel: AppLocalizations.of(
@@ -205,7 +217,7 @@ class ScreenTitleSolo extends ConsumerWidget {
   }
 }
 
-class ScreenTitle extends ConsumerWidget {
+class ScreenTitle extends StatelessWidget {
   final String title;
   final bool showingResults;
   const ScreenTitle(
@@ -217,7 +229,6 @@ class ScreenTitle extends ConsumerWidget {
   @override
   Widget build(
     BuildContext context,
-    ref,
   ) {
     if (context.canPop() && !showingResults) {
       return ConstrainedBox(
@@ -271,13 +282,15 @@ class ScreenTitle extends ConsumerWidget {
             ),
             TextButton(
               onPressed: () {
-                ref
-                    .read(
-                      audioControllerProvider,
-                    )
-                    .toggleMusic(
-                      ref,
-                    );
+                Provider.of<AudioController>(
+                  context,
+                  listen: false,
+                ).toggleMusic(
+                  Provider.of<SharedPreferences?>(
+                    context,
+                    listen: false,
+                  ),
+                );
               },
               child: Container(
                 padding: const EdgeInsets.fromLTRB(
@@ -287,9 +300,14 @@ class ScreenTitle extends ConsumerWidget {
                   10,
                 ),
                 child: Icon(
-                  ref.watch(
-                    soundVolumeProvider,
-                  )
+                  // Provider.of<SharedPreferences?>(
+                  //           context,
+                  //         )?.getBool(
+                  //           StoredValuesKeys.soundVolume.storageKey,
+                  //         ) ??
+                  Provider.of<AudioController>(
+                    context,
+                  ).sound.muted
                       ? Icons.music_off_outlined
                       : Icons.music_note_outlined,
                   semanticLabel: AppLocalizations.of(
@@ -342,13 +360,15 @@ class ScreenTitle extends ConsumerWidget {
           ),
           TextButton(
             onPressed: () {
-              ref
-                  .read(
-                    audioControllerProvider,
-                  )
-                  .toggleMusic(
-                    ref,
-                  );
+              Provider.of<AudioController>(
+                context,
+                listen: false,
+              ).toggleMusic(
+                Provider.of<SharedPreferences?>(
+                  context,
+                  listen: false,
+                ),
+              );
             },
             child: Container(
               padding: const EdgeInsets.fromLTRB(
@@ -358,9 +378,14 @@ class ScreenTitle extends ConsumerWidget {
                 10,
               ),
               child: Icon(
-                ref.watch(
-                  soundVolumeProvider,
-                )
+                // Provider.of<SharedPreferences?>(
+                //           context,
+                //         )?.getBool(
+                //           StoredValuesKeys.soundVolume.storageKey,
+                //         ) ??
+                Provider.of<AudioController>(
+                  context,
+                ).sound.muted
                     ? Icons.music_off_outlined
                     : Icons.music_note_outlined,
                 semanticLabel: AppLocalizations.of(
@@ -379,7 +404,7 @@ class ScreenTitle extends ConsumerWidget {
   }
 }
 
-class MenuScreenTitle extends ConsumerWidget {
+class MenuScreenTitle extends StatelessWidget {
   final String title;
   const MenuScreenTitle(
     this.title, {
@@ -389,7 +414,6 @@ class MenuScreenTitle extends ConsumerWidget {
   @override
   Widget build(
     BuildContext context,
-    ref,
   ) =>
       Row(
         mainAxisAlignment: MainAxisAlignment.start,
@@ -431,18 +455,25 @@ class MenuScreenTitle extends ConsumerWidget {
             ),
             child: TextButton(
               onPressed: () {
-                ref
-                    .read(
-                      audioControllerProvider,
-                    )
-                    .toggleMusic(
-                      ref,
-                    );
+                Provider.of<AudioController>(
+                  context,
+                  listen: false,
+                ).toggleMusic(
+                  Provider.of<SharedPreferences?>(
+                    context,
+                    listen: false,
+                  ),
+                );
               },
               child: Icon(
-                ref.watch(
-                  soundVolumeProvider,
-                )
+                // Provider.of<SharedPreferences?>(
+                //           context,
+                //         )?.getBool(
+                //           StoredValuesKeys.soundVolume.storageKey,
+                //         ) ??
+                Provider.of<AudioController>(
+                  context,
+                ).sound.muted
                     ? Icons.music_off_outlined
                     : Icons.music_note_outlined,
                 semanticLabel: AppLocalizations.of(

@@ -43,9 +43,8 @@ dependencies:
   url_launcher: ^6.2.5
   shared_preferences: ^2.2.2
   audioplayers: ^6.0.0
-  flutter_riverpod: ^2.5.1
-  riverpod_annotation: ^2.3.5
   google_fonts: ^6.2.1
+  provider: ^6.1.2
 
 dev_dependencies:
   flutter_test:
@@ -57,10 +56,6 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^3.0.0
-  build_runner:
-  custom_lint:
-  riverpod_generator: ^2.4.0
-  riverpod_lint: ^2.3.10
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

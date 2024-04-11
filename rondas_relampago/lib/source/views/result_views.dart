@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
 // Owned
 import 'package:rondas_relampago/source/models/gameplay/board_sizes.dart';
@@ -11,7 +12,7 @@ import 'package:rondas_relampago/source/models/gameplay/game_units/game_unit.dar
 import 'package:rondas_relampago/source/models/gameplay/game_units/unit_painter.dart';
 import 'package:rondas_relampago/source/models/gameplay/gameplay_features.dart';
 import 'package:rondas_relampago/source/models/gameplay/marker_painter.dart';
-import 'package:rondas_relampago/source/pages/utils/providers.dart';
+// import 'package:rondas_relampago/source/pages/utils/providers.dart';
 import 'package:rondas_relampago/source/storage/storage.dart';
 import 'package:rondas_relampago/source/views/game_table.dart';
 
@@ -30,7 +31,7 @@ enum ResultsText {
   thanks
 }
 
-class ResultsView extends ConsumerWidget {
+class ResultsView extends StatelessWidget {
   final GameBoardSize boardSize;
   final MatchData matchData;
   final void Function() onDone;
@@ -46,7 +47,6 @@ class ResultsView extends ConsumerWidget {
   @override
   Widget build(
     context,
-    ref,
   ) =>
       FutureBuilder(
         future: Future<
@@ -120,19 +120,18 @@ class ResultsView extends ConsumerWidget {
                 )!
                     .playerIsWinner;
 
-                final storage = await SharedPreferences.getInstance();
-
-                storage.setInt(
+                Provider.of<SharedPreferences?>(
+                  context,
+                )?.setInt(
                   StoredValuesKeys.casualWins.storageKey,
-                  switch (storage.getInt(
+                  switch (Provider.of<SharedPreferences?>(
+                    context,
+                  )?.getInt(
                     StoredValuesKeys.casualWins.storageKey,
                   )) {
                     int score => score + 1,
                     _ => 1,
                   },
-                );
-                ref.invalidate(
-                  casualWinsProvider,
                 );
                 return (
                   calculatedLoserBoard: PlayerBoard.playerTwo,
@@ -153,11 +152,13 @@ class ResultsView extends ConsumerWidget {
                 )!
                     .playerIsWinner;
 
-                final storage = await SharedPreferences.getInstance();
-
-                storage.setInt(
+                Provider.of<SharedPreferences?>(
+                  context,
+                )?.setInt(
                   StoredValuesKeys.casualWins.storageKey,
-                  switch (storage.getInt(
+                  switch (Provider.of<SharedPreferences?>(
+                    context,
+                  )?.getInt(
                     StoredValuesKeys.casualWins.storageKey,
                   )) {
                     int score => score + 1,

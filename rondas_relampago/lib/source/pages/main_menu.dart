@@ -3,16 +3,18 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:rondas_relampago/source/pages/utils/route_names.dart';
-import 'package:rondas_relampago/source/storage/storage.dart';
+import 'package:provider/provider.dart';
+import 'package:rondas_relampago/source/pages/utils/change_notifiers.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 // Owned
 import 'package:rondas_relampago/source/models/ads/ads.dart';
+import 'package:rondas_relampago/source/storage/storage.dart';
+import 'package:rondas_relampago/source/pages/utils/route_names.dart';
 import 'package:rondas_relampago/source/models/themes/themes.dart';
 import 'package:rondas_relampago/source/pages/utils/content_prompt.dart';
 import 'package:rondas_relampago/source/pages/utils/screen_title.dart';
-import 'package:rondas_relampago/source/pages/utils/providers.dart';
+// import 'package:rondas_relampago/source/pages/utils/providers.dart';
 
 class MainMenu extends StatelessWidget {
   const MainMenu({
@@ -84,7 +86,7 @@ class MainMenu extends StatelessWidget {
       );
 }
 
-class _MenuItem extends ConsumerWidget {
+class _MenuItem extends StatelessWidget {
   final String route;
   final String buttonText;
   const _MenuItem(
@@ -96,7 +98,6 @@ class _MenuItem extends ConsumerWidget {
   @override
   Widget build(
     BuildContext context,
-    ref,
   ) =>
       Expanded(
         child: TextButton(
@@ -117,15 +118,13 @@ class _MenuItem extends ConsumerWidget {
               horizontal: 20,
             ),
             decoration: BoxDecoration(
-              color: switch (ref.watch(
-                selectedThemeProvider,
-              )) {
-                AsyncData(
-                  :final value,
-                ) =>
-                  value,
-                _ => RGBThemes.blue
-              }
+              color: RGBThemes
+                  .values[Provider.of<SharedPreferences?>(
+                        context,
+                      )?.getInt(
+                        StoredValuesKeys.selectedTheme.storageKey,
+                      ) ??
+                      RGBThemes.blue.index]
                   .seedColor,
               borderRadius: const BorderRadius.all(
                 Radius.circular(
@@ -143,7 +142,7 @@ class _MenuItem extends ConsumerWidget {
       );
 }
 
-class _MenuThemePicker extends ConsumerWidget {
+class _MenuThemePicker extends StatelessWidget {
   const _MenuThemePicker({
     super.key,
   });
@@ -151,7 +150,6 @@ class _MenuThemePicker extends ConsumerWidget {
   @override
   Widget build(
     context,
-    ref,
   ) =>
       FittedBox(
         fit: BoxFit.contain,
@@ -174,24 +172,19 @@ class _MenuThemePicker extends ConsumerWidget {
                 10.0,
               ),
               alignment: AlignmentDirectional.bottomStart,
-              value: switch (ref.watch(
-                selectedThemeProvider,
-              )) {
-                AsyncData(
-                  :final value,
-                ) =>
-                  value,
-                _ => RGBThemes.blue
-              },
-              dropdownColor: switch (ref.watch(
-                selectedThemeProvider,
-              )) {
-                AsyncData(
-                  :final value,
-                ) =>
-                  value,
-                _ => RGBThemes.blue
-              }
+              value: RGBThemes.values[Provider.of<SharedPreferences?>(
+                    context,
+                  )?.getInt(
+                    StoredValuesKeys.selectedTheme.storageKey,
+                  ) ??
+                  RGBThemes.blue.index],
+              dropdownColor: RGBThemes
+                  .values[Provider.of<SharedPreferences?>(
+                        context,
+                      )?.getInt(
+                        StoredValuesKeys.selectedTheme.storageKey,
+                      ) ??
+                      RGBThemes.blue.index]
                   .seedColor,
               icon: Padding(
                 padding: const EdgeInsets.symmetric(
@@ -283,13 +276,16 @@ class _MenuThemePicker extends ConsumerWidget {
               ],
               onChanged: (
                 RGBThemes? theme,
-              ) async {
-                await (await SharedPreferences.getInstance()).setInt(
-                    StoredValuesKeys.selectedTheme.storageKey,
+              ) {
+                Provider.of<SharedPreferences?>(
+                  context,
+                  listen: false,
+                )?.setInt(StoredValuesKeys.selectedTheme.storageKey,
                     theme?.index ?? RGBThemes.blue.index);
-                ref.invalidate(
-                  selectedThemeProvider,
-                );
+                Provider.of<StateUpdater>(
+                  context,
+                  listen: false,
+                )();
               },
             ),
             Text(
@@ -307,7 +303,7 @@ class _MenuThemePicker extends ConsumerWidget {
       );
 }
 
-class _AdSection extends ConsumerWidget {
+class _AdSection extends StatelessWidget {
   const _AdSection({
     super.key,
   });
@@ -315,7 +311,6 @@ class _AdSection extends ConsumerWidget {
   @override
   Widget build(
     context,
-    ref,
   ) =>
       Expanded(
         child:
@@ -334,16 +329,11 @@ class _AdSection extends ConsumerWidget {
                                     width:
                                         AdSize.mediumRectangle.width.toDouble(),
                                     height: 350,
-                                    child: ref
-                                            .watch(
-                                              preloadedNativeAdsProvider,
-                                            )
+                                    child: Provider.of<List<NativeAd>>(context)
                                             .isNotEmpty
                                         ? AdWidget(
-                                            ad: ref
-                                                .watch(
-                                                  preloadedNativeAdsProvider,
-                                                )
+                                            ad: Provider.of<List<NativeAd>>(
+                                                    context)
                                                 .last,
                                           )
                                         : null),
@@ -378,7 +368,7 @@ class _AdSection extends ConsumerWidget {
       );
 }
 
-class _GameStatistics extends ConsumerWidget {
+class _GameStatistics extends StatelessWidget {
   const _GameStatistics({
     super.key,
   });
@@ -386,7 +376,6 @@ class _GameStatistics extends ConsumerWidget {
   @override
   Widget build(
     context,
-    ref,
   ) =>
       SizedBox(
         height: _gap.height! * 3,
@@ -418,23 +407,22 @@ class _GameStatistics extends ConsumerWidget {
                   ),
             ),
             Text(
-                switch (ref.watch(
-                  casualWinsProvider,
-                )) {
-                  AsyncData(
-                    :final value,
-                  ) =>
-                    value,
-                  _ => 0
-                }
-                    .toString(),
-                style: Theme.of(
-                  context,
-                ).textTheme.headline6?.copyWith(
-                      color: Theme.of(
-                        context,
-                      ).primaryColor,
-                    )),
+              (
+                Provider.of<SharedPreferences?>(
+                      context,
+                    )?.getInt(
+                      StoredValuesKeys.casualWins.storageKey,
+                    ) ??
+                    0,
+              ).toString(),
+              style: Theme.of(
+                context,
+              ).textTheme.headline6?.copyWith(
+                    color: Theme.of(
+                      context,
+                    ).primaryColor,
+                  ),
+            ),
             Text(
               ' • ',
               style: Theme.of(
