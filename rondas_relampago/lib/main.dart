@@ -35,6 +35,7 @@ void main() async {
               // PreloadedAds.preloadSingleAd(AdKind.nativePlatform);
               break;
             case null:
+              break;
           }
         },
       ),
@@ -43,6 +44,6 @@ void main() async {
   // await SharedPreferences.getInstance()
   //     .then((value) async => await value.remove(key));
   runApp(
-    Relampago(),
+    const Relampago(),
   );
 }

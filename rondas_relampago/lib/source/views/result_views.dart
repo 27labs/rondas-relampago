@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
+// import 'package:provider/provider.dart';
 
 // Owned
 import 'package:rondas_relampago/source/models/gameplay/board_sizes.dart';
@@ -13,7 +13,7 @@ import 'package:rondas_relampago/source/models/gameplay/game_units/unit_painter.
 import 'package:rondas_relampago/source/models/gameplay/gameplay_features.dart';
 import 'package:rondas_relampago/source/models/gameplay/marker_painter.dart';
 // import 'package:rondas_relampago/source/pages/utils/providers.dart';
-import 'package:rondas_relampago/source/storage/storage.dart';
+// import 'package:rondas_relampago/source/storage/storage.dart';
 import 'package:rondas_relampago/source/views/game_table.dart';
 
 enum PlayerBoard {
@@ -35,10 +35,10 @@ class ResultsView extends StatelessWidget {
   final GameBoardSize boardSize;
   final MatchData matchData;
   final void Function() onDone;
-  final bool isPlayingSolo;
+  final ({void Function(int) updateCasualScoreBy})? isPlayingSolo;
   const ResultsView(
     this.boardSize, {
-    required this.isPlayingSolo,
+    this.isPlayingSolo,
     required this.matchData,
     required this.onDone,
     super.key,
@@ -83,100 +83,80 @@ class ResultsView extends StatelessWidget {
                 playerOneHits++;
               }
             }
-            if (!isPlayingSolo) {
-              if (playerOneHits > playerTwoHits) {
-                // _selectedPlayerBoard = PlayerBoard.playerTwo;
-                return (
-                  calculatedLoserBoard: PlayerBoard.playerTwo,
-                  resultsText: AppLocalizations.of(context)!.p1IsWinner,
-                );
-              }
-              if (playerOneHits < playerTwoHits) {
-                // _selectedPlayerBoard = PlayerBoard.playerOne;
-                return (
-                  calculatedLoserBoard: PlayerBoard.playerOne,
-                  resultsText: AppLocalizations.of(context)!.p2IsWinner,
-                );
-              }
-              if (playerOneScore > playerTwoScore) {
-                // _selectedPlayerBoard = PlayerBoard.playerTwo;
-                return (
-                  calculatedLoserBoard: PlayerBoard.playerTwo,
-                  resultsText: AppLocalizations.of(context)!.p1IsWinner,
-                );
-              }
-              if (playerOneScore < playerTwoScore) {
-                // _selectedPlayerBoard = PlayerBoard.playerOne;
-                return (
-                  calculatedLoserBoard: PlayerBoard.playerOne,
-                  resultsText: AppLocalizations.of(context)!.p2IsWinner,
-                );
-              }
-            } else {
-              if (playerOneHits > playerTwoHits) {
-                // _selectedPlayerBoard = PlayerBoard.playerTwo;
-                final resultsText = AppLocalizations.of(
-                  context,
-                )!
-                    .playerIsWinner;
-
-                Provider.of<SharedPreferences?>(
-                  context,
-                )?.setInt(
-                  StoredValuesKeys.casualWins.storageKey,
-                  switch (Provider.of<SharedPreferences?>(
+            switch (isPlayingSolo) {
+              case null:
+                if (playerOneHits > playerTwoHits) {
+                  // _selectedPlayerBoard = PlayerBoard.playerTwo;
+                  return (
+                    calculatedLoserBoard: PlayerBoard.playerTwo,
+                    resultsText: AppLocalizations.of(context)!.p1IsWinner,
+                  );
+                }
+                if (playerOneHits < playerTwoHits) {
+                  // _selectedPlayerBoard = PlayerBoard.playerOne;
+                  return (
+                    calculatedLoserBoard: PlayerBoard.playerOne,
+                    resultsText: AppLocalizations.of(context)!.p2IsWinner,
+                  );
+                }
+                if (playerOneScore > playerTwoScore) {
+                  // _selectedPlayerBoard = PlayerBoard.playerTwo;
+                  return (
+                    calculatedLoserBoard: PlayerBoard.playerTwo,
+                    resultsText: AppLocalizations.of(context)!.p1IsWinner,
+                  );
+                }
+                if (playerOneScore < playerTwoScore) {
+                  // _selectedPlayerBoard = PlayerBoard.playerOne;
+                  return (
+                    calculatedLoserBoard: PlayerBoard.playerOne,
+                    resultsText: AppLocalizations.of(context)!.p2IsWinner,
+                  );
+                }
+                break;
+              case _:
+                if (playerOneHits > playerTwoHits) {
+                  // _selectedPlayerBoard = PlayerBoard.playerTwo;
+                  final resultsText = AppLocalizations.of(
                     context,
-                  )?.getInt(
-                    StoredValuesKeys.casualWins.storageKey,
-                  )) {
-                    int score => score + 1,
-                    _ => 1,
-                  },
-                );
-                return (
-                  calculatedLoserBoard: PlayerBoard.playerTwo,
-                  resultsText: resultsText,
-                );
-              }
-              if (playerOneHits < playerTwoHits) {
-                // _selectedPlayerBoard = PlayerBoard.playerOne;
-                return (
-                  calculatedLoserBoard: PlayerBoard.playerOne,
-                  resultsText: AppLocalizations.of(context)!.computerIsWinner,
-                );
-              }
-              if (playerOneScore > playerTwoScore) {
-                // _selectedPlayerBoard = PlayerBoard.playerTwo;
-                final resultsText = AppLocalizations.of(
-                  context,
-                )!
-                    .playerIsWinner;
+                  )!
+                      .playerIsWinner;
 
-                Provider.of<SharedPreferences?>(
-                  context,
-                )?.setInt(
-                  StoredValuesKeys.casualWins.storageKey,
-                  switch (Provider.of<SharedPreferences?>(
+                  isPlayingSolo!.updateCasualScoreBy(1);
+
+                  return (
+                    calculatedLoserBoard: PlayerBoard.playerTwo,
+                    resultsText: resultsText,
+                  );
+                }
+                if (playerOneHits < playerTwoHits) {
+                  // _selectedPlayerBoard = PlayerBoard.playerOne;
+                  return (
+                    calculatedLoserBoard: PlayerBoard.playerOne,
+                    resultsText: AppLocalizations.of(context)!.computerIsWinner,
+                  );
+                }
+                if (playerOneScore > playerTwoScore) {
+                  // _selectedPlayerBoard = PlayerBoard.playerTwo;
+                  final resultsText = AppLocalizations.of(
                     context,
-                  )?.getInt(
-                    StoredValuesKeys.casualWins.storageKey,
-                  )) {
-                    int score => score + 1,
-                    _ => 1,
-                  },
-                );
-                return (
-                  calculatedLoserBoard: PlayerBoard.playerTwo,
-                  resultsText: resultsText,
-                );
-              }
-              if (playerOneScore < playerTwoScore) {
-                // _selectedPlayerBoard = PlayerBoard.playerOne;
-                return (
-                  calculatedLoserBoard: PlayerBoard.playerOne,
-                  resultsText: AppLocalizations.of(context)!.computerIsWinner,
-                );
-              }
+                  )!
+                      .playerIsWinner;
+
+                  isPlayingSolo!.updateCasualScoreBy(1);
+
+                  return (
+                    calculatedLoserBoard: PlayerBoard.playerTwo,
+                    resultsText: resultsText,
+                  );
+                }
+                if (playerOneScore < playerTwoScore) {
+                  // _selectedPlayerBoard = PlayerBoard.playerOne;
+                  return (
+                    calculatedLoserBoard: PlayerBoard.playerOne,
+                    resultsText: AppLocalizations.of(context)!.computerIsWinner,
+                  );
+                }
             }
             int totallyRandomCoinFlip = DateTime.now().millisecond % 5;
             if (totallyRandomCoinFlip < 2) {
@@ -344,10 +324,10 @@ class ResultsView extends StatelessWidget {
                                                 child: Center(
                                                   child: switch (
                                                       isPlayingSolo) {
-                                                    true => Text(
+                                                    null => Text(
                                                         '${AppLocalizations.of(
                                                           context,
-                                                        )!.computer} 👑',
+                                                        )!.playerTwo} 👑',
                                                         style: Theme.of(
                                                           context,
                                                         )
@@ -362,7 +342,7 @@ class ResultsView extends StatelessWidget {
                                                     _ => Text(
                                                         '${AppLocalizations.of(
                                                           context,
-                                                        )!.playerTwo} 👑',
+                                                        )!.computer} 👑',
                                                         style: Theme.of(
                                                           context,
                                                         )
@@ -722,11 +702,11 @@ class ResultsView extends StatelessWidget {
                                                 child: Center(
                                                   child: switch (
                                                       isPlayingSolo) {
-                                                    true => Text(
+                                                    null => Text(
                                                         AppLocalizations.of(
                                                           context,
                                                         )!
-                                                            .computer,
+                                                            .playerTwo,
                                                         style: Theme.of(
                                                           context,
                                                         )
@@ -742,7 +722,7 @@ class ResultsView extends StatelessWidget {
                                                         AppLocalizations.of(
                                                           context,
                                                         )!
-                                                            .playerTwo,
+                                                            .computer,
                                                         style: Theme.of(
                                                           context,
                                                         )

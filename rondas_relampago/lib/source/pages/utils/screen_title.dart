@@ -3,28 +3,45 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:provider/provider.dart';
+// import 'package:provider/provider.dart';
 
 // Owned
 import 'package:rondas_relampago/source/models/ads/ads.dart';
 import 'package:rondas_relampago/source/models/audio/audio_controller.dart';
 // import 'package:rondas_relampago/source/pages/utils/providers.dart';
-import 'package:rondas_relampago/source/storage/storage.dart';
+// import 'package:rondas_relampago/source/storage/storage.dart';
 
-class ScreenTitleSolo extends StatelessWidget {
+class ScreenTitleSolo extends StatefulWidget {
   final String title;
   final bool showingResults;
+  final GameAudioSettings Function() onVolumeToggled;
   const ScreenTitleSolo(
     this.title, {
     this.showingResults = false,
+    required this.onVolumeToggled,
     super.key,
   });
+
+  @override
+  State<ScreenTitleSolo> createState() => ScreenTitleSoloState();
+}
+
+class ScreenTitleSoloState extends State<ScreenTitleSolo> {
+  BannerAd? _bannerAd;
+  GameAudioSettings _volume = GameAudioSettings.soundOn;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.onVolumeToggled();
+    _volume = widget.onVolumeToggled();
+  }
 
   @override
   Widget build(
     BuildContext context,
   ) {
-    if (context.canPop() && !showingResults) {
+    if (context.canPop() && !widget.showingResults) {
       return ConstrainedBox(
         constraints: const BoxConstraints(
           maxHeight: 100,
@@ -58,9 +75,7 @@ class ScreenTitleSolo extends StatelessWidget {
             Expanded(
               child: (Platform.isAndroid || Platform.isIOS) &&
                       // !kDebugMode &&
-                      Provider.of<List<BannerAd>>(
-                        context,
-                      ).isNotEmpty
+                      _bannerAd != null
                   ? Padding(
                       padding: const EdgeInsets.symmetric(
                         vertical: 15,
@@ -69,9 +84,7 @@ class ScreenTitleSolo extends StatelessWidget {
                         height: AdSize.banner.height.toDouble(),
                         width: AdSize.banner.width.toDouble(),
                         child: AdWidget(
-                          ad: Provider.of<List<BannerAd>>(
-                            context,
-                          ).last,
+                          ad: _bannerAd!,
                         ),
                       ),
                     )
@@ -81,7 +94,7 @@ class ScreenTitleSolo extends StatelessWidget {
                           8.0,
                         ),
                         child: Text(
-                          title,
+                          widget.title,
                           style: Theme.of(
                             context,
                           ).textTheme.headline5!.copyWith(
@@ -95,15 +108,9 @@ class ScreenTitleSolo extends StatelessWidget {
             ),
             TextButton(
               onPressed: () {
-                Provider.of<AudioController>(
-                  context,
-                  listen: false,
-                ).toggleMusic(
-                  Provider.of<SharedPreferences?>(
-                    context,
-                    listen: false,
-                  ),
-                );
+                setState(() {
+                  _volume = widget.onVolumeToggled();
+                });
               },
               child: Container(
                 padding: const EdgeInsets.fromLTRB(
@@ -118,9 +125,7 @@ class ScreenTitleSolo extends StatelessWidget {
                   //         )?.getBool(
                   //           StoredValuesKeys.soundVolume.storageKey,
                   //         ) ??
-                  Provider.of<AudioController>(
-                    context,
-                  ).sound.muted
+                  _volume.muted
                       ? Icons.music_off_outlined
                       : Icons.music_note_outlined,
                   semanticLabel: AppLocalizations.of(
@@ -173,15 +178,9 @@ class ScreenTitleSolo extends StatelessWidget {
           ),
           TextButton(
             onPressed: () {
-              Provider.of<AudioController>(
-                context,
-                listen: false,
-              ).toggleMusic(
-                Provider.of<SharedPreferences?>(
-                  context,
-                  listen: false,
-                ),
-              );
+              setState(() {
+                _volume = widget.onVolumeToggled();
+              });
             },
             child: Container(
               padding: const EdgeInsets.fromLTRB(
@@ -196,9 +195,7 @@ class ScreenTitleSolo extends StatelessWidget {
                 //         )?.getBool(
                 //           StoredValuesKeys.soundVolume.storageKey,
                 //         ) ??
-                Provider.of<AudioController>(
-                  context,
-                ).sound.muted
+                _volume.muted
                     ? Icons.music_off_outlined
                     : Icons.music_note_outlined,
                 semanticLabel: AppLocalizations.of(
@@ -217,20 +214,36 @@ class ScreenTitleSolo extends StatelessWidget {
   }
 }
 
-class ScreenTitle extends StatelessWidget {
+class ScreenTitle extends StatefulWidget {
   final String title;
   final bool showingResults;
+  final GameAudioSettings Function() onVolumeToggled;
   const ScreenTitle(
     this.title, {
     this.showingResults = false,
+    required this.onVolumeToggled,
     super.key,
   });
+
+  @override
+  State<ScreenTitle> createState() => ScreenTitleState();
+}
+
+class ScreenTitleState extends State<ScreenTitle> {
+  GameAudioSettings _volume = GameAudioSettings.soundOn;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.onVolumeToggled();
+    _volume = widget.onVolumeToggled();
+  }
 
   @override
   Widget build(
     BuildContext context,
   ) {
-    if (context.canPop() && !showingResults) {
+    if (context.canPop() && !widget.showingResults) {
       return ConstrainedBox(
         constraints: const BoxConstraints(
           maxHeight: 100,
@@ -268,7 +281,7 @@ class ScreenTitle extends StatelessWidget {
                     8.0,
                   ),
                   child: Text(
-                    title,
+                    widget.title,
                     style: Theme.of(
                       context,
                     ).textTheme.headline5!.copyWith(
@@ -282,15 +295,9 @@ class ScreenTitle extends StatelessWidget {
             ),
             TextButton(
               onPressed: () {
-                Provider.of<AudioController>(
-                  context,
-                  listen: false,
-                ).toggleMusic(
-                  Provider.of<SharedPreferences?>(
-                    context,
-                    listen: false,
-                  ),
-                );
+                setState(() {
+                  _volume = widget.onVolumeToggled();
+                });
               },
               child: Container(
                 padding: const EdgeInsets.fromLTRB(
@@ -305,9 +312,7 @@ class ScreenTitle extends StatelessWidget {
                   //         )?.getBool(
                   //           StoredValuesKeys.soundVolume.storageKey,
                   //         ) ??
-                  Provider.of<AudioController>(
-                    context,
-                  ).sound.muted
+                  _volume.muted
                       ? Icons.music_off_outlined
                       : Icons.music_note_outlined,
                   semanticLabel: AppLocalizations.of(
@@ -360,15 +365,9 @@ class ScreenTitle extends StatelessWidget {
           ),
           TextButton(
             onPressed: () {
-              Provider.of<AudioController>(
-                context,
-                listen: false,
-              ).toggleMusic(
-                Provider.of<SharedPreferences?>(
-                  context,
-                  listen: false,
-                ),
-              );
+              setState(() {
+                _volume = widget.onVolumeToggled();
+              });
             },
             child: Container(
               padding: const EdgeInsets.fromLTRB(
@@ -383,9 +382,7 @@ class ScreenTitle extends StatelessWidget {
                 //         )?.getBool(
                 //           StoredValuesKeys.soundVolume.storageKey,
                 //         ) ??
-                Provider.of<AudioController>(
-                  context,
-                ).sound.muted
+                _volume.muted
                     ? Icons.music_off_outlined
                     : Icons.music_note_outlined,
                 semanticLabel: AppLocalizations.of(
@@ -404,12 +401,28 @@ class ScreenTitle extends StatelessWidget {
   }
 }
 
-class MenuScreenTitle extends StatelessWidget {
+class MenuScreenTitle extends StatefulWidget {
   final String title;
+  final GameAudioSettings Function() onVolumeToggled;
   const MenuScreenTitle(
     this.title, {
+    required this.onVolumeToggled,
     super.key,
   });
+
+  @override
+  State<MenuScreenTitle> createState() => MenuScreenTitleState();
+}
+
+class MenuScreenTitleState extends State<MenuScreenTitle> {
+  GameAudioSettings _volume = GameAudioSettings.soundOn;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.onVolumeToggled();
+    _volume = widget.onVolumeToggled();
+  }
 
   @override
   Widget build(
@@ -433,7 +446,7 @@ class MenuScreenTitle extends StatelessWidget {
               child: FittedBox(
                 fit: BoxFit.fitWidth,
                 child: Text(
-                  title,
+                  widget.title,
                   style: Theme.of(
                     context,
                   ).textTheme.headline5?.copyWith(
@@ -455,15 +468,9 @@ class MenuScreenTitle extends StatelessWidget {
             ),
             child: TextButton(
               onPressed: () {
-                Provider.of<AudioController>(
-                  context,
-                  listen: false,
-                ).toggleMusic(
-                  Provider.of<SharedPreferences?>(
-                    context,
-                    listen: false,
-                  ),
-                );
+                setState(() {
+                  _volume = widget.onVolumeToggled();
+                });
               },
               child: Icon(
                 // Provider.of<SharedPreferences?>(
@@ -471,9 +478,7 @@ class MenuScreenTitle extends StatelessWidget {
                 //         )?.getBool(
                 //           StoredValuesKeys.soundVolume.storageKey,
                 //         ) ??
-                Provider.of<AudioController>(
-                  context,
-                ).sound.muted
+                _volume.muted
                     ? Icons.music_off_outlined
                     : Icons.music_note_outlined,
                 semanticLabel: AppLocalizations.of(

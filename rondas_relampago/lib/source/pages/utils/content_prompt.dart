@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:provider/provider.dart';
+// import 'package:provider/provider.dart';
 
 // Owned
 import 'package:rondas_relampago/source/models/ads/ads.dart';
@@ -60,10 +60,8 @@ class ContentPromptDialog extends StatelessWidget {
               AdsController.limitAds();
               PreloadedAds.drain();
               PreloadedAds.preloadSingleAd(
-                  AdKind.nativePlatform,
-                  Provider.of<List<NativeAd>>(
-                    context,
-                  ));
+                AdKind.nativePlatform,
+              );
               context.pop();
               await (await SharedPreferences.getInstance()).setBool(
                 StoredValuesKeys.adRating.storageKey,
@@ -82,10 +80,8 @@ class ContentPromptDialog extends StatelessWidget {
               AdsController.unlimitAds();
               PreloadedAds.drain();
               PreloadedAds.preloadSingleAd(
-                  AdKind.nativePlatform,
-                  Provider.of<List<NativeAd>>(
-                    context,
-                  ));
+                AdKind.nativePlatform,
+              );
               context.pop();
               await (await SharedPreferences.getInstance()).setBool(
                 StoredValuesKeys.adRating.storageKey,

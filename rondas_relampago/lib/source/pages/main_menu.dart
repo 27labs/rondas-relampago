@@ -3,23 +3,55 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:provider/provider.dart';
-import 'package:rondas_relampago/source/pages/utils/change_notifiers.dart';
+import 'package:rondas_relampago/source/models/audio/audio_controller.dart';
+// import 'package:provider/provider.dart';
+// import 'package:rondas_relampago/source/pages/utils/change_notifiers.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 // Owned
 import 'package:rondas_relampago/source/models/ads/ads.dart';
-import 'package:rondas_relampago/source/storage/storage.dart';
+// import 'package:rondas_relampago/source/storage/storage.dart';
 import 'package:rondas_relampago/source/pages/utils/route_names.dart';
 import 'package:rondas_relampago/source/models/themes/themes.dart';
 import 'package:rondas_relampago/source/pages/utils/content_prompt.dart';
 import 'package:rondas_relampago/source/pages/utils/screen_title.dart';
 // import 'package:rondas_relampago/source/pages/utils/providers.dart';
 
-class MainMenu extends StatelessWidget {
+class MainMenu extends StatefulWidget {
+  final RGBThemes activeTheme;
+  final int? Function() getCasualWins;
+  final RGBThemes Function(RGBThemes) onThemeSelected;
+  final GameAudioSettings Function() onVolumeToggled;
   const MainMenu({
+    required this.onThemeSelected,
+    required this.onVolumeToggled,
+    required this.activeTheme,
+    required this.getCasualWins,
     super.key,
   });
+
+  @override
+  State<MainMenu> createState() => MainMenuState();
+}
+
+class MainMenuState extends State<MainMenu> {
+  RGBThemes _activeTheme = RGBThemes.blue;
+
+  void _onThemeSelected(
+    RGBThemes theme,
+  ) {
+    setState(() {
+      _activeTheme = widget.onThemeSelected(
+        theme,
+      );
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _activeTheme = widget.activeTheme;
+  }
 
   @override
   Widget build(
@@ -38,8 +70,12 @@ class MainMenu extends StatelessWidget {
                 context,
               )!
                   .gameName,
+              onVolumeToggled: widget.onVolumeToggled,
             ),
-            const _MenuThemePicker(),
+            _MenuThemePicker(
+              onThemeSelected: _onThemeSelected,
+              activeTheme: _activeTheme,
+            ),
             _gap,
             _MenuItem(
               AppLocalizations.of(
@@ -47,6 +83,7 @@ class MainMenu extends StatelessWidget {
               )!
                   .singlePlayerMode,
               route: RouteNames.casualPlay.name,
+              color: _activeTheme.seedColor,
             ),
             _gap,
             _MenuItem(
@@ -54,7 +91,8 @@ class MainMenu extends StatelessWidget {
                 context,
               )!
                   .casualMode,
-              route: 'casual_mode',
+              route: RouteNames.casualPairPlay.name,
+              color: _activeTheme.seedColor,
             ),
             _gap,
             _MenuItem(
@@ -63,10 +101,13 @@ class MainMenu extends StatelessWidget {
               )!
                   .competitiveMode,
               route: 'competitive_mode',
+              color: _activeTheme.seedColor,
             ),
             _gap,
             const _AdSection(),
-            const _GameStatistics(),
+            _GameStatistics(
+              getCasualWins: widget.getCasualWins,
+            ),
             TextButton(
               onPressed: () {
                 launchUrlString(
@@ -89,8 +130,10 @@ class MainMenu extends StatelessWidget {
 class _MenuItem extends StatelessWidget {
   final String route;
   final String buttonText;
+  final Color color;
   const _MenuItem(
     this.buttonText, {
+    required this.color,
     required this.route,
     super.key,
   });
@@ -118,14 +161,7 @@ class _MenuItem extends StatelessWidget {
               horizontal: 20,
             ),
             decoration: BoxDecoration(
-              color: RGBThemes
-                  .values[Provider.of<SharedPreferences?>(
-                        context,
-                      )?.getInt(
-                        StoredValuesKeys.selectedTheme.storageKey,
-                      ) ??
-                      RGBThemes.blue.index]
-                  .seedColor,
+              color: color,
               borderRadius: const BorderRadius.all(
                 Radius.circular(
                   10,
@@ -143,7 +179,11 @@ class _MenuItem extends StatelessWidget {
 }
 
 class _MenuThemePicker extends StatelessWidget {
+  final void Function(RGBThemes) onThemeSelected;
+  final RGBThemes activeTheme;
   const _MenuThemePicker({
+    required this.onThemeSelected,
+    required this.activeTheme,
     super.key,
   });
 
@@ -172,20 +212,8 @@ class _MenuThemePicker extends StatelessWidget {
                 10.0,
               ),
               alignment: AlignmentDirectional.bottomStart,
-              value: RGBThemes.values[Provider.of<SharedPreferences?>(
-                    context,
-                  )?.getInt(
-                    StoredValuesKeys.selectedTheme.storageKey,
-                  ) ??
-                  RGBThemes.blue.index],
-              dropdownColor: RGBThemes
-                  .values[Provider.of<SharedPreferences?>(
-                        context,
-                      )?.getInt(
-                        StoredValuesKeys.selectedTheme.storageKey,
-                      ) ??
-                      RGBThemes.blue.index]
-                  .seedColor,
+              value: activeTheme,
+              dropdownColor: activeTheme.seedColor,
               icon: Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 5.0,
@@ -275,18 +303,11 @@ class _MenuThemePicker extends StatelessWidget {
                 ),
               ],
               onChanged: (
-                RGBThemes? theme,
-              ) {
-                Provider.of<SharedPreferences?>(
-                  context,
-                  listen: false,
-                )?.setInt(StoredValuesKeys.selectedTheme.storageKey,
-                    theme?.index ?? RGBThemes.blue.index);
-                Provider.of<StateUpdater>(
-                  context,
-                  listen: false,
-                )();
-              },
+                theme,
+              ) =>
+                  onThemeSelected(
+                theme ?? RGBThemes.blue,
+              ),
             ),
             Text(
               ' •',
@@ -303,73 +324,85 @@ class _MenuThemePicker extends StatelessWidget {
       );
 }
 
-class _AdSection extends StatelessWidget {
+class _AdSection extends StatefulWidget {
   const _AdSection({
     super.key,
   });
 
   @override
+  State<_AdSection> createState() => _AdSectionState();
+}
+
+class _AdSectionState extends State<_AdSection> {
+  BannerAd? _bannerAd;
+
+  @override
+  void initState() {
+    super.initState();
+    // TODO: fetchAd()
+  }
+
+  @override
   Widget build(
     context,
-  ) =>
-      Expanded(
-        child:
-            // kDebugMode ||
-            !(Platform.isAndroid || Platform.isIOS)
-                ? const SizedBox()
-                : Platform.isAndroid
-                    ? Column(
-                        children: [
-                          Expanded(
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              mainAxisSize: MainAxisSize.max,
-                              children: [
-                                SizedBox(
-                                    width:
-                                        AdSize.mediumRectangle.width.toDouble(),
-                                    height: 350,
-                                    child: Provider.of<List<NativeAd>>(context)
-                                            .isNotEmpty
-                                        ? AdWidget(
-                                            ad: Provider.of<List<NativeAd>>(
-                                                    context)
-                                                .last,
-                                          )
-                                        : null),
-                                const SizedBox(
-                                  width: 20,
-                                ),
-                                Center(
-                                  child: IconButton(
-                                    iconSize: 25,
-                                    onPressed: () {
-                                      showDialog(
-                                        context: context,
-                                        builder: (innerContext) =>
-                                            const ContentPromptDialog(),
-                                      );
-                                    },
-                                    icon: Icon(
-                                      Icons.refresh_rounded,
-                                      color: Theme.of(
-                                        context,
-                                      ).primaryColor,
-                                    ),
-                                  ),
-                                ),
-                              ],
+  ) => // kDebugMode ||
+      !(Platform.isAndroid || Platform.isIOS)
+          ? const SizedBox()
+          : Platform.isAndroid
+              ? Expanded(
+                  child: Column(
+                    children: [
+                      Expanded(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.max,
+                          children: [
+                            SizedBox(
+                              width: AdSize.mediumRectangle.width.toDouble(),
+                              height: 350,
+                              child: _bannerAd != null
+                                  ? AdWidget(
+                                      ad: _bannerAd!,
+                                    )
+                                  : null,
                             ),
-                          ),
-                          _gap,
-                        ],
-                      )
-                    : const SizedBox(),
-      );
+                            const SizedBox(
+                              width: 20,
+                            ),
+                            Center(
+                              child: IconButton(
+                                iconSize: 25,
+                                onPressed: () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (
+                                      innerContext,
+                                    ) =>
+                                        const ContentPromptDialog(),
+                                  );
+                                },
+                                icon: Icon(
+                                  Icons.refresh_rounded,
+                                  color: Theme.of(
+                                    context,
+                                  ).primaryColor,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      _gap,
+                    ],
+                  ),
+                )
+              : const SizedBox();
 }
 
 class _GameStatistics extends StatelessWidget {
+  final int? Function() getCasualWins;
   const _GameStatistics({
+    required this.getCasualWins,
     super.key,
   });
 
@@ -407,14 +440,7 @@ class _GameStatistics extends StatelessWidget {
                   ),
             ),
             Text(
-              (
-                Provider.of<SharedPreferences?>(
-                      context,
-                    )?.getInt(
-                      StoredValuesKeys.casualWins.storageKey,
-                    ) ??
-                    0,
-              ).toString(),
+              (getCasualWins() ?? 0).toString(),
               style: Theme.of(
                 context,
               ).textTheme.headline6?.copyWith(

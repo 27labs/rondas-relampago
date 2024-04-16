@@ -151,7 +151,7 @@ class PreloadedAds {
     }
   }
 
-  static Future<void> preloadSingleAd(AdKind adKind, List<Ad> adList) async {
+  static Future<void> preloadSingleAd(AdKind adKind) async {
     const adRequest = AdRequest();
 
     switch (adKind) {
@@ -166,7 +166,7 @@ class PreloadedAds {
           request: adRequest,
           listener: NativeAdListener(
             onAdLoaded: (ad) {
-              adList.add(
+              _ads.nativePlatform.add(
                 ad as NativeAd,
                 // AdKind.nativePlatform,
               );
@@ -184,7 +184,7 @@ class PreloadedAds {
           size: AdSize.banner,
           listener: BannerAdListener(
             onAdLoaded: (ad) {
-              adList.add(
+              _ads.adaptiveBanner.add(
                 ad as BannerAd,
                 // AdKind.nativePlatform,
               );
@@ -202,7 +202,7 @@ class PreloadedAds {
           size: AdSize.mediumRectangle,
           listener: BannerAdListener(
             onAdLoaded: (ad) {
-              adList.add(
+              _ads.mediumRectangleBanner.add(
                 ad as BannerAd,
                 // AdKind.nativePlatform,
               );

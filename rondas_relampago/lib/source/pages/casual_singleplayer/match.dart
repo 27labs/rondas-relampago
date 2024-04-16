@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
+import 'package:rondas_relampago/source/models/audio/audio_controller.dart';
 
 // Owned
 import 'package:rondas_relampago/source/models/gameplay/board_sizes.dart';
@@ -26,19 +27,27 @@ enum CasualMatchTwoPlayerStage {
 }
 
 class CasualMatch extends StatefulWidget {
-  final bool multiplayer;
+  final ({void Function(int) updateCasualScoreBy})? singleplayer;
+  final GameAudioSettings Function() onVolumeToggled;
   const CasualMatch({
-    this.multiplayer = false,
+    this.singleplayer,
+    required this.onVolumeToggled,
     super.key,
   });
   @override
-  State<CasualMatch> createState() => switch (multiplayer) {
-        false => CasualMatchState(),
-        true => CasualMatchMultiplayerState(),
+  State<CasualMatch> createState() => switch (singleplayer) {
+        null => CasualMatchMultiplayerState(),
+        _ => CasualMatchState(
+            updateCasualScoreBy: singleplayer!.updateCasualScoreBy,
+          ),
       };
 }
 
 class CasualMatchState extends State<CasualMatch> {
+  final void Function(int) updateCasualScoreBy;
+  CasualMatchState({
+    required this.updateCasualScoreBy,
+  });
   CasualMatchStage _stage = CasualMatchStage.unitPlacement;
 
   CasualMatchData _data = const CasualMatchData();
@@ -85,6 +94,7 @@ class CasualMatchState extends State<CasualMatch> {
                     context,
                   )!
                       .playerPlacingTitle,
+                  onVolumeToggled: widget.onVolumeToggled,
                 ),
                 Expanded(
                   child: UnitPlacementView(
@@ -107,6 +117,7 @@ class CasualMatchState extends State<CasualMatch> {
                     context,
                   )!
                       .playerGuessingTitle,
+                  onVolumeToggled: widget.onVolumeToggled,
                 ),
                 Expanded(
                   child: MarkerPlacementView(
@@ -259,11 +270,12 @@ class CasualMatchState extends State<CasualMatch> {
                     )!
                         .resultsTitle,
                     showingResults: true,
+                    onVolumeToggled: widget.onVolumeToggled,
                   ),
                   Expanded(
                     child: ResultsView(
                       GameBoardSize.small,
-                      isPlayingSolo: true,
+                      isPlayingSolo: (updateCasualScoreBy: updateCasualScoreBy),
                       matchData: switch (snapshot.data) {
                         (
                           CasualMatchUnits units,
@@ -351,6 +363,7 @@ class CasualMatchMultiplayerState extends State<CasualMatch> {
                     context,
                   )!
                       .p1PlacingTitle,
+                  onVolumeToggled: widget.onVolumeToggled,
                 ),
                 Expanded(
                   child: UnitPlacementView(
@@ -373,6 +386,7 @@ class CasualMatchMultiplayerState extends State<CasualMatch> {
                     context,
                   )!
                       .p2PlacingTitle,
+                  onVolumeToggled: widget.onVolumeToggled,
                 ),
                 Expanded(
                   child: UnitPlacementView(
@@ -395,6 +409,7 @@ class CasualMatchMultiplayerState extends State<CasualMatch> {
                     context,
                   )!
                       .p1GuessingTitle,
+                  onVolumeToggled: widget.onVolumeToggled,
                 ),
                 Expanded(
                   child: MarkerPlacementView(
@@ -418,6 +433,7 @@ class CasualMatchMultiplayerState extends State<CasualMatch> {
                     context,
                   )!
                       .p2GuessingTitle,
+                  onVolumeToggled: widget.onVolumeToggled,
                 ),
                 Expanded(
                   child: MarkerPlacementView(
@@ -459,11 +475,11 @@ class CasualMatchMultiplayerState extends State<CasualMatch> {
                     )!
                         .resultsTitle,
                     showingResults: true,
+                    onVolumeToggled: widget.onVolumeToggled,
                   ),
                   Expanded(
                     child: ResultsView(
                       GameBoardSize.small,
-                      isPlayingSolo: true,
                       matchData: switch (snapshot.data) {
                         _ => _data,
                       },

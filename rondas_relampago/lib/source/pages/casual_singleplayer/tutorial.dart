@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
+import 'package:rondas_relampago/source/models/audio/audio_controller.dart';
+// import 'package:provider/provider.dart';
 // import 'package:rondas_relampago/source/models/ads/ads.dart';
 
 // Owner
@@ -10,10 +11,16 @@ import 'package:rondas_relampago/source/models/themes/themes.dart';
 // import 'package:rondas_relampago/source/pages/utils/providers.dart';
 import 'package:rondas_relampago/source/pages/utils/route_names.dart';
 import 'package:rondas_relampago/source/pages/utils/screen_title.dart';
-import 'package:rondas_relampago/source/storage/storage.dart';
+// import 'package:rondas_relampago/source/storage/storage.dart';
 
 class TutorialForCasual extends StatelessWidget {
+  final GameAudioSettings Function() onVolumeToggled;
+  final RGBThemes activeTheme;
+  final bool multiplayer;
   const TutorialForCasual({
+    required this.onVolumeToggled,
+    required this.activeTheme,
+    this.multiplayer = false,
     super.key,
   });
 
@@ -35,6 +42,7 @@ class TutorialForCasual extends StatelessWidget {
               context,
             )!
                 .tutorialTitle,
+            onVolumeToggled: onVolumeToggled,
           ),
           Expanded(
             child: Container(
@@ -206,7 +214,10 @@ class TutorialForCasual extends StatelessWidget {
               autofocus: true,
               child: TextButton(
                 onPressed: () => context.pushReplacementNamed(
-                  RouteNames.singlePlayer.name,
+                  switch (multiplayer) {
+                    false => RouteNames.singlePlayer.name,
+                    true => RouteNames.twoPlayers.name,
+                  },
                 ),
                 child: Container(
                   decoration: BoxDecoration(
@@ -215,14 +226,7 @@ class TutorialForCasual extends StatelessWidget {
                         5.0,
                       ),
                     ),
-                    color: RGBThemes
-                        .values[Provider.of<SharedPreferences?>(
-                              context,
-                            )?.getInt(
-                              StoredValuesKeys.selectedTheme.storageKey,
-                            ) ??
-                            RGBThemes.blue.index]
-                        .seedColor,
+                    color: activeTheme.seedColor,
                   ),
                   margin: const EdgeInsets.fromLTRB(
                     0,
