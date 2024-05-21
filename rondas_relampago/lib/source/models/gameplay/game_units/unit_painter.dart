@@ -2,8 +2,8 @@
 // import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:rondas_relampago/source/models/gameplay/gameplay_features.dart';
-import 'game_unit.dart';
+import 'package:game_common/game_common.dart';
+import 'package:rondas_relampago/source/models/gameplay/game_units/game_unit.dart';
 
 class UnitsPainter extends StatelessWidget {
   final MatchUnits unitsOnBoard;
@@ -32,7 +32,7 @@ class UnitsPainter extends StatelessWidget {
               size: Size.infinite,
               painter: _GameUnitPainter(
                 unit,
-                Theme.of(context).errorColor,
+                Colors.amber,
                 rows: boardRows,
                 columns: boardColumns,
               ),

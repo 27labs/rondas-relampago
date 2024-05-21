@@ -2,8 +2,9 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:game_common/game_common.dart';
 import 'package:rondas_relampago/source/models/gameplay/game_units/game_unit.dart';
-import 'package:rondas_relampago/source/models/gameplay/gameplay_features.dart';
+import 'package:rondas_relampago/source/models/gameplay/game_units/game_unit_renderer.dart';
 // import 'package:rondas_relampago/source/game_units/game_unit.dart';
 
 class GameTable extends StatelessWidget {
@@ -47,9 +48,10 @@ class GameTable extends StatelessWidget {
                     0.21,
                   ),
                 ),
-                color: Theme.of(
-                  context,
-                ).cardColor,
+                color: Theme.of(context)
+                    .colorScheme
+                    .inversePrimary
+                    .withOpacity(0.5),
               ),
               // margin: EdgeInsets.all((gameTableArea / 1000) * 2),
             ),
@@ -263,33 +265,25 @@ class GameTableUnitsInput extends StatelessWidget {
                                   ? SizedBox(
                                       width: draggableSize * hitBox.length,
                                       height: draggableSize * hitBox.length,
-                                      child: switch (size) {
-                                        GameUnitSize.small =>
-                                          GameUnitSmall.renderHorizontalUnit,
-                                        GameUnitSize.medium =>
-                                          GameUnitMedium.renderHorizontalUnit,
-                                        GameUnitSize.large =>
-                                          GameUnitLarge.renderHorizontalUnit,
-                                      },
+                                      child:
+                                          RenderedGameUnit.renderHorizontalUnit(
+                                        size,
+                                      ),
                                     )
                                   : SizedBox(
                                       height: draggableSize * hitBox.length,
                                       width: draggableSize * hitBox.length,
-                                      child: switch (size) {
-                                        GameUnitSize.small =>
-                                          GameUnitSmall.renderVerticalUnit,
-                                        GameUnitSize.medium =>
-                                          GameUnitMedium.renderVerticalUnit,
-                                        GameUnitSize.large =>
-                                          GameUnitLarge.renderVerticalUnit,
-                                      },
+                                      child:
+                                          RenderedGameUnit.renderVerticalUnit(
+                                        size,
+                                      ),
                                     ),
                             _ => null
                           },
                         ),
                         child: TextButton(
                           style: ButtonStyle(
-                            surfaceTintColor: MaterialStateProperty.all(
+                            overlayColor: MaterialStateProperty.all<Color>(
                               Colors.transparent,
                             ),
                             // overlayColor: MaterialStateProperty.all(
@@ -300,6 +294,12 @@ class GameTableUnitsInput extends StatelessWidget {
                             onTouch(
                               x: j,
                               y: i,
+                              dropped: !unitsState.hitBoxes.contains(
+                                GameMarker(
+                                  xCoordinate: j,
+                                  yCoordinate: i,
+                                ),
+                              ),
                             );
                           },
                           child: Container(
@@ -485,7 +485,7 @@ class GameTableMarkersInput extends StatelessWidget {
                         ),
                         child: TextButton(
                           style: ButtonStyle(
-                            surfaceTintColor: MaterialStateProperty.all(
+                            overlayColor: MaterialStateProperty.all<Color>(
                               Colors.transparent,
                             ),
                             // overlayColor: MaterialStateProperty.all(

@@ -30,6 +30,10 @@ class AdsRequirementsScreen extends StatelessWidget {
         ),
       ),
     );
-    return const Scaffold();
+    return Scaffold(
+      backgroundColor: Theme.of(
+        context,
+      ).colorScheme.onSecondaryContainer,
+    );
   }
 }

@@ -20,7 +20,7 @@ class ContentPromptDialog extends StatelessWidget {
       AlertDialog(
         backgroundColor: Theme.of(
           context,
-        ).errorColor,
+        ).colorScheme.onPrimaryContainer,
         titleTextStyle: Theme.of(
           context,
         ).textTheme.titleLarge!.copyWith(
@@ -41,12 +41,17 @@ class ContentPromptDialog extends StatelessWidget {
           )!
               .ageConfirmationTitleText,
         ),
-        content: Text(
-          AppLocalizations.of(
-            context,
-          )!
-              .ageConfirmationNotice,
-          textAlign: TextAlign.justify,
+        content: Padding(
+          padding: const EdgeInsets.all(14.0),
+          child: SingleChildScrollView(
+            child: Text(
+              AppLocalizations.of(
+                context,
+              )!
+                  .ageConfirmationNotice,
+              textAlign: TextAlign.justify,
+            ),
+          ),
         ),
         icon: const Icon(
           Icons.check,
@@ -57,42 +62,46 @@ class ContentPromptDialog extends StatelessWidget {
         actions: [
           FilledButton(
             onPressed: () async {
-              AdsController.limitAds();
+              final storage = await SharedPreferences.getInstance();
+              AdsController.limitAds(storage);
               PreloadedAds.drain();
-              PreloadedAds.preloadSingleAd(
-                AdKind.nativePlatform,
-              );
+              // PreloadedAds.preloadSingleAd(
+              //   AdKind.nativePlatform,
+              // );
               context.pop();
-              await (await SharedPreferences.getInstance()).setBool(
-                StoredValuesKeys.adRating.storageKey,
-                false,
-              );
             },
             child: Text(
               AppLocalizations.of(
                 context,
               )!
                   .confirmYoungerText,
+              style: TextStyle(
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSecondaryContainer,
+              ),
             ),
           ),
           FilledButton(
             onPressed: () async {
-              AdsController.unlimitAds();
+              final storage = await SharedPreferences.getInstance();
+              AdsController.unlimitAds(storage);
               PreloadedAds.drain();
-              PreloadedAds.preloadSingleAd(
-                AdKind.nativePlatform,
-              );
+              // PreloadedAds.preloadSingleAd(
+              //   AdKind.nativePlatform,
+              // );
               context.pop();
-              await (await SharedPreferences.getInstance()).setBool(
-                StoredValuesKeys.adRating.storageKey,
-                true,
-              );
             },
             child: Text(
               AppLocalizations.of(
                 context,
               )!
                   .confirmOlderText,
+              style: TextStyle(
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSecondaryContainer,
+              ),
             ),
           ),
         ],

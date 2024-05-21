@@ -1,8 +1,6 @@
-import 'package:flutter/widgets.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'paints.dart';
+// import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-sealed class GameUnit {
+abstract class GameUnit {
   final int _xComponent;
   final int _yComponent;
   final GameUnitSize _size;
@@ -16,9 +14,11 @@ sealed class GameUnit {
   int get xComponent => _xComponent;
   int get yComponent => _yComponent;
 
-  CustomPaint get renderUnit;
+  // CustomPaint get renderUnit;
 
-  String parse(BuildContext context);
+  GameUnit get gameUnit;
+
+  // String parse(BuildContext context);
 
   static bool doTheyCollide(GameUnit unit1, GameUnit unit2) =>
       unit1.hitBox.intersection(unit2.hitBox).isNotEmpty;
@@ -40,8 +40,7 @@ sealed class GameUnit {
   factory GameUnit.fromSize(GameUnitSize size, GameUnitOrientation orientation,
       {required int x, required int y}) {
     if (x < 0 || y < 0) {
-      throw ErrorWidget(
-          const FormatException("The coordinates went negative.'"));
+      throw const FormatException("The coordinates went negative.'");
     }
     switch (size) {
       case GameUnitSize.small:
@@ -58,41 +57,69 @@ sealed class GameUnit {
         }
     }
   }
+
+  Map<String, dynamic> toJson() => {
+        'x': _xComponent.toString(),
+        'y': _yComponent.toString(),
+        'orientation': _orientation._orientation,
+        'size': _size._size,
+      };
+
+  static GameUnit? fromJson(
+    Map<String, dynamic>? json,
+  ) =>
+      switch (json) {
+        Map json => GameUnit.fromSize(
+            switch (json['size']) {
+              'Large' => GameUnitSize.large,
+              'Medium' => GameUnitSize.medium,
+              _ => GameUnitSize.small,
+            },
+            switch (json['orientation']) {
+              'Horizontal' => GameUnitOrientation.horizontal,
+              _ => GameUnitOrientation.vertical,
+            },
+            x: int.parse(
+              json['x'],
+            ),
+            y: int.parse(
+              json['y'],
+            ),
+          ),
+        _ => null,
+      };
 }
 
 class GameUnitSmall extends GameUnit {
-  final void Function(Canvas, Size) _painter;
-  GameUnitSmall(int xComponent, int yComponent, GameUnitOrientation orientation,
-      this._painter)
-      : super(xComponent, yComponent, orientation, GameUnitSize.small);
+  GameUnitSmall(
+    int xComponent,
+    int yComponent,
+    GameUnitOrientation orientation,
+  ) : super(
+          xComponent,
+          yComponent,
+          orientation,
+          GameUnitSize.small,
+        );
 
   factory GameUnitSmall.fromOrientation(
     GameUnitOrientation orientation, {
     required int x,
     required int y,
-  }) {
-    switch (orientation) {
-      case GameUnitOrientation.horizontal:
-        return GameUnitSmall(
-          x,
-          y,
-          orientation,
-          _horizontalPainter,
-        );
-      case GameUnitOrientation.vertical:
-        return GameUnitSmall(
-          x,
-          y,
-          orientation,
-          _verticalPainter,
-        );
-    }
-  }
+  }) =>
+      GameUnitSmall(
+        x,
+        y,
+        orientation,
+      );
+
+  // @override
+  // String parse(BuildContext context) {
+  //   return '${AppLocalizations.of(context)!.smallUnitParse} (x: $xComponent, y: $yComponent).';
+  // }
 
   @override
-  String parse(BuildContext context) {
-    return '${AppLocalizations.of(context)!.smallUnitParse} (x: $xComponent, y: $yComponent).';
-  }
+  GameUnitSmall get gameUnit => this;
 
   @override
   Set<GameMarker> get hitBox {
@@ -124,72 +151,39 @@ class GameUnitSmall extends GameUnit {
         }
     }
     return hitBox;
-  }
-
-  @override
-  CustomPaint get renderUnit {
-    return CustomPaint(size: Size.infinite, painter: UnitPainter(_painter));
-  }
-
-  static CustomPaint get renderHorizontalUnit {
-    return CustomPaint(
-        size: Size.infinite, painter: UnitPainter(_horizontalPainter));
-  }
-
-  static CustomPaint get renderVerticalUnit {
-    return CustomPaint(
-        size: Size.infinite, painter: UnitPainter(_verticalPainter));
-  }
-
-  static void _horizontalPainter(Canvas canvas, Size size) {
-    if (size.width < size.height) {
-      canvas.drawRect(
-          Rect.fromCenter(
-              center: Offset.zero, width: size.width, height: size.width / 2),
-          UnitPaints.small);
-    } else {
-      canvas.drawRect(
-          Rect.fromCenter(
-              center: Offset.zero, width: size.height, height: size.height / 2),
-          UnitPaints.small);
-    }
-  }
-
-  static void _verticalPainter(Canvas canvas, Size size) {
-    if (size.width < size.height) {
-      canvas.drawRect(
-          Rect.fromCenter(
-              center: Offset.zero, width: size.width / 2, height: size.width),
-          UnitPaints.small);
-    } else {
-      canvas.drawRect(
-          Rect.fromCenter(
-              center: Offset.zero, width: size.height / 2, height: size.height),
-          UnitPaints.small);
-    }
   }
 }
 
 class GameUnitMedium extends GameUnit {
-  final void Function(Canvas, Size) _painter;
-  GameUnitMedium(int xComponent, int yComponent,
-      GameUnitOrientation orientation, this._painter)
-      : super(xComponent, yComponent, orientation, GameUnitSize.medium);
+  GameUnitMedium(
+    int xComponent,
+    int yComponent,
+    GameUnitOrientation orientation,
+  ) : super(
+          xComponent,
+          yComponent,
+          orientation,
+          GameUnitSize.medium,
+        );
 
-  factory GameUnitMedium.fromOrientation(GameUnitOrientation orientation,
-      {required int x, required int y}) {
-    switch (orientation) {
-      case GameUnitOrientation.horizontal:
-        return GameUnitMedium(x, y, orientation, _horizontalPainter);
-      case GameUnitOrientation.vertical:
-        return GameUnitMedium(x, y, orientation, _verticalPainter);
-    }
-  }
+  factory GameUnitMedium.fromOrientation(
+    GameUnitOrientation orientation, {
+    required int x,
+    required int y,
+  }) =>
+      GameUnitMedium(
+        x,
+        y,
+        orientation,
+      );
 
   @override
-  String parse(BuildContext context) {
-    return '${AppLocalizations.of(context)!.mediumUnitParse} (x: $xComponent, y: $yComponent).';
-  }
+  GameUnitMedium get gameUnit => this;
+
+  // @override
+  // String parse(BuildContext context) {
+  //   return '${AppLocalizations.of(context)!.mediumUnitParse} (x: $xComponent, y: $yComponent).';
+  // }
 
   @override
   Set<GameMarker> get hitBox {
@@ -221,72 +215,34 @@ class GameUnitMedium extends GameUnit {
         }
     }
     return hitBox;
-  }
-
-  @override
-  CustomPaint get renderUnit {
-    return CustomPaint(size: Size.infinite, painter: UnitPainter(_painter));
-  }
-
-  static CustomPaint get renderHorizontalUnit {
-    return CustomPaint(
-        size: Size.infinite, painter: UnitPainter(_horizontalPainter));
-  }
-
-  static CustomPaint get renderVerticalUnit {
-    return CustomPaint(
-        size: Size.infinite, painter: UnitPainter(_verticalPainter));
-  }
-
-  static void _horizontalPainter(Canvas canvas, Size size) {
-    if (size.width < size.height) {
-      canvas.drawRect(
-          Rect.fromCenter(
-              center: Offset.zero, width: size.width, height: size.width / 3),
-          UnitPaints.medium);
-    } else {
-      canvas.drawRect(
-          Rect.fromCenter(
-              center: Offset.zero, width: size.height, height: size.height / 3),
-          UnitPaints.medium);
-    }
-  }
-
-  static void _verticalPainter(Canvas canvas, Size size) {
-    if (size.width < size.height) {
-      canvas.drawRect(
-          Rect.fromCenter(
-              center: Offset.zero, width: size.width / 3, height: size.width),
-          UnitPaints.medium);
-    } else {
-      canvas.drawRect(
-          Rect.fromCenter(
-              center: Offset.zero, width: size.height / 3, height: size.height),
-          UnitPaints.medium);
-    }
   }
 }
 
 class GameUnitLarge extends GameUnit {
-  final void Function(Canvas, Size) _painter;
-  GameUnitLarge(int xComponent, int yComponent, GameUnitOrientation orientation,
-      this._painter)
-      : super(xComponent, yComponent, orientation, GameUnitSize.large);
+  GameUnitLarge(
+    int xComponent,
+    int yComponent,
+    GameUnitOrientation orientation,
+  ) : super(
+          xComponent,
+          yComponent,
+          orientation,
+          GameUnitSize.large,
+        );
 
-  factory GameUnitLarge.fromOrientation(GameUnitOrientation orientation,
-      {required int x, required int y}) {
-    switch (orientation) {
-      case GameUnitOrientation.horizontal:
-        return GameUnitLarge(x, y, orientation, _horizontalPainter);
-      case GameUnitOrientation.vertical:
-        return GameUnitLarge(x, y, orientation, _verticalPainter);
-    }
-  }
+  factory GameUnitLarge.fromOrientation(
+    GameUnitOrientation orientation, {
+    required int x,
+    required int y,
+  }) =>
+      GameUnitLarge(
+        x,
+        y,
+        orientation,
+      );
 
   @override
-  String parse(BuildContext context) {
-    return '${AppLocalizations.of(context)!.largeUnitParse} (x: $xComponent, y: $yComponent).';
-  }
+  GameUnitLarge get gameUnit => this;
 
   @override
   Set<GameMarker> get hitBox {
@@ -318,49 +274,6 @@ class GameUnitLarge extends GameUnit {
         }
     }
     return hitBox;
-  }
-
-  @override
-  CustomPaint get renderUnit {
-    return CustomPaint(size: Size.infinite, painter: UnitPainter(_painter));
-  }
-
-  static CustomPaint get renderHorizontalUnit {
-    return CustomPaint(
-        size: Size.infinite, painter: UnitPainter(_horizontalPainter));
-  }
-
-  static CustomPaint get renderVerticalUnit {
-    return CustomPaint(
-        size: Size.infinite, painter: UnitPainter(_verticalPainter));
-  }
-
-  static void _horizontalPainter(Canvas canvas, Size size) {
-    if (size.width < size.height) {
-      canvas.drawRect(
-          Rect.fromCenter(
-              center: Offset.zero, width: size.width, height: size.width / 4),
-          UnitPaints.large);
-    } else {
-      canvas.drawRect(
-          Rect.fromCenter(
-              center: Offset.zero, width: size.height, height: size.height / 4),
-          UnitPaints.large);
-    }
-  }
-
-  static void _verticalPainter(Canvas canvas, Size size) {
-    if (size.width < size.height) {
-      canvas.drawRect(
-          Rect.fromCenter(
-              center: Offset.zero, width: size.width / 4, height: size.width),
-          UnitPaints.large);
-    } else {
-      canvas.drawRect(
-          Rect.fromCenter(
-              center: Offset.zero, width: size.height / 4, height: size.height),
-          UnitPaints.large);
-    }
   }
 }
 
@@ -389,11 +302,32 @@ class GameMarker {
   @override
   int get hashCode => '$xCoordinate - $yCoordinate'.hashCode;
 
-  factory GameMarker.fromString(String markerCoordinates) {
-    List<String> coordinates = markerCoordinates.split('-');
-    return GameMarker(
-        xCoordinate: int.parse(coordinates[0]),
-        yCoordinate: int.parse(coordinates[1]));
+  // factory GameMarker.fromString(String markerCoordinates) {
+  //   List<String> coordinates = markerCoordinates.split('-');
+  //   return GameMarker(
+  //       xCoordinate: int.parse(coordinates[0]),
+  //       yCoordinate: int.parse(coordinates[1]));
+  // }
+
+  GameMarker.fromJson(Map<String, dynamic> json)
+      : xCoordinate = int.parse(json['xCoordinate']),
+        yCoordinate = int.parse(json['yCoordinate']);
+
+  Map<String, dynamic> toJson() => {
+        'xCoordinate': xCoordinate.toString(),
+        'yCoordinate': yCoordinate.toString(),
+      };
+
+  static Set<GameMarker> setFromJson(List<Map<String, dynamic>> json) {
+    Set<GameMarker> markers = {};
+
+    for (Map<String, dynamic> marker in json) {
+      markers.add(
+        GameMarker.fromJson(marker),
+      );
+    }
+
+    return markers;
   }
 }
 

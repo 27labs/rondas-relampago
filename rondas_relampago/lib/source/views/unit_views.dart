@@ -4,10 +4,11 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 // Owned
+import 'package:game_common/game_common.dart';
 import 'package:rondas_relampago/source/models/gameplay/board_sizes.dart';
 import 'package:rondas_relampago/source/models/gameplay/game_units/game_unit.dart';
+import 'package:rondas_relampago/source/models/gameplay/game_units/game_unit_renderer.dart';
 import 'package:rondas_relampago/source/models/gameplay/game_units/unit_painter.dart';
-import 'package:rondas_relampago/source/models/gameplay/gameplay_features.dart';
 import 'package:rondas_relampago/source/views/game_table.dart';
 
 class UnitPlacementView extends StatefulWidget {
@@ -179,185 +180,198 @@ class UnitPlacementViewState extends State<UnitPlacementView> {
             ],
           ),
         ),
-        widget.unitsState.isFull
-            ? CallbackShortcuts(
-                bindings: {
-                  const SingleActivator(
-                    LogicalKeyboardKey.enter,
-                    includeRepeats: false,
-                  ): widget.onDone,
-                  const SingleActivator(
-                    LogicalKeyboardKey.numpadEnter,
-                    includeRepeats: false,
-                  ): widget.onDone,
-                  const SingleActivator(
-                    LogicalKeyboardKey.gameButtonSelect,
-                    includeRepeats: false,
-                  ): widget.onDone,
-                  const SingleActivator(
-                    LogicalKeyboardKey.gameButtonStart,
-                    includeRepeats: false,
-                  ): () => context.pop(),
-                },
-                child: Focus(
-                  autofocus: true,
-                  focusNode: theFocusNode,
-                  child: TextButton(
-                    onPressed: widget.onDone,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: const BorderRadius.all(
-                          Radius.circular(
-                            5.0,
-                          ),
+        SizedBox(
+          height: 90,
+          child: Center(
+            child: switch (widget.unitsState.isFull) {
+              true => CallbackShortcuts(
+                  bindings: {
+                    const SingleActivator(
+                      LogicalKeyboardKey.enter,
+                      includeRepeats: false,
+                    ): widget.onDone,
+                    const SingleActivator(
+                      LogicalKeyboardKey.numpadEnter,
+                      includeRepeats: false,
+                    ): widget.onDone,
+                    const SingleActivator(
+                      LogicalKeyboardKey.gameButtonSelect,
+                      includeRepeats: false,
+                    ): widget.onDone,
+                    const SingleActivator(
+                      LogicalKeyboardKey.gameButtonStart,
+                      includeRepeats: false,
+                    ): () => context.pop(),
+                  },
+                  child: Focus(
+                    autofocus: true,
+                    focusNode: theFocusNode,
+                    child: TextButton(
+                      style: ButtonStyle(
+                        overlayColor: MaterialStateProperty.all<Color>(
+                          Colors.transparent,
                         ),
-                        color: Theme.of(
-                          context,
-                        ).errorColor,
                       ),
-                      margin: const EdgeInsets.fromLTRB(
-                        10,
-                        10,
-                        10,
-                        10,
-                      ),
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 10,
-                        horizontal: 20,
-                      ),
-                      child: Text(
-                        AppLocalizations.of(
-                          context,
-                        )!
-                            .continueText,
-                        style: Theme.of(
-                          context,
-                        ).textTheme.headline6?.copyWith(
-                              color: Theme.of(
-                                context,
-                              ).primaryColor,
+                      onPressed: widget.onDone,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: const BorderRadius.all(
+                            Radius.circular(
+                              5.0,
                             ),
+                          ),
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.inversePrimary.withOpacity(
+                                0.5,
+                              ),
+                        ),
+                        margin: const EdgeInsets.fromLTRB(
+                          10,
+                          10,
+                          10,
+                          10,
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 10,
+                          horizontal: 20,
+                        ),
+                        child: Text(
+                          AppLocalizations.of(
+                            context,
+                          )!
+                              .continueText,
+                          style: Theme.of(
+                            context,
+                          ).textTheme.headlineSmall?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).primaryColor,
+                              ),
+                        ),
                       ),
                     ),
                   ),
                 ),
-              )
-            : CallbackShortcuts(
-                bindings: {
-                  const SingleActivator(
-                    LogicalKeyboardKey.keyA,
-                    includeRepeats: false,
-                  ): () {
-                    onKindOfGameUnitSelection(
-                      size: GameUnitSize.small,
-                    );
+              false => CallbackShortcuts(
+                  bindings: {
+                    const SingleActivator(
+                      LogicalKeyboardKey.keyA,
+                      includeRepeats: false,
+                    ): () {
+                      onKindOfGameUnitSelection(
+                        size: GameUnitSize.small,
+                      );
+                    },
+                    const SingleActivator(
+                      LogicalKeyboardKey.keyS,
+                      includeRepeats: false,
+                    ): () {
+                      onKindOfGameUnitSelection(
+                        size: GameUnitSize.medium,
+                      );
+                    },
+                    const SingleActivator(
+                      LogicalKeyboardKey.keyD,
+                      includeRepeats: false,
+                    ): () {
+                      onKindOfGameUnitSelection(
+                        size: GameUnitSize.large,
+                      );
+                    },
+                    const SingleActivator(
+                      LogicalKeyboardKey.keyC,
+                      includeRepeats: false,
+                    ): () {
+                      onKindOfGameUnitSelection(
+                        orientation: GameUnitOrientation.vertical,
+                      );
+                    },
+                    const SingleActivator(
+                      LogicalKeyboardKey.keyV,
+                      includeRepeats: false,
+                    ): () {
+                      onKindOfGameUnitSelection(
+                        orientation: GameUnitOrientation.horizontal,
+                      );
+                    },
+                    const SingleActivator(
+                      LogicalKeyboardKey.gameButtonX,
+                      includeRepeats: false,
+                    ): () {
+                      onKindOfGameUnitSelection(
+                        size: GameUnitSize.small,
+                      );
+                    },
+                    const SingleActivator(
+                      LogicalKeyboardKey.gameButtonY,
+                      includeRepeats: false,
+                    ): () {
+                      onKindOfGameUnitSelection(
+                        size: GameUnitSize.medium,
+                      );
+                    },
+                    const SingleActivator(
+                      LogicalKeyboardKey.gameButtonB,
+                      includeRepeats: false,
+                    ): () {
+                      onKindOfGameUnitSelection(
+                        size: GameUnitSize.large,
+                      );
+                    },
+                    const SingleActivator(
+                      LogicalKeyboardKey.gameButtonRight2,
+                      includeRepeats: false,
+                    ): () {
+                      onKindOfGameUnitSelection(
+                        orientation: GameUnitOrientation.vertical,
+                      );
+                    },
+                    const SingleActivator(
+                      LogicalKeyboardKey.gameButtonRight1,
+                      includeRepeats: false,
+                    ): () {
+                      onKindOfGameUnitSelection(
+                        orientation: GameUnitOrientation.horizontal,
+                      );
+                    },
+                    const SingleActivator(
+                      LogicalKeyboardKey.gameButtonLeft1,
+                      includeRepeats: false,
+                    ): () {
+                      onKindOfGameUnitSelection(
+                        orientation: GameUnitOrientation.vertical,
+                      );
+                    },
+                    const SingleActivator(
+                      LogicalKeyboardKey.gameButtonLeft2,
+                      includeRepeats: false,
+                    ): () {
+                      onKindOfGameUnitSelection(
+                        orientation: GameUnitOrientation.horizontal,
+                      );
+                    },
+                    const SingleActivator(
+                      LogicalKeyboardKey.gameButtonStart,
+                      includeRepeats: false,
+                    ): () {
+                      context.pop();
+                    },
                   },
-                  const SingleActivator(
-                    LogicalKeyboardKey.keyS,
-                    includeRepeats: false,
-                  ): () {
-                    onKindOfGameUnitSelection(
-                      size: GameUnitSize.medium,
-                    );
-                  },
-                  const SingleActivator(
-                    LogicalKeyboardKey.keyD,
-                    includeRepeats: false,
-                  ): () {
-                    onKindOfGameUnitSelection(
-                      size: GameUnitSize.large,
-                    );
-                  },
-                  const SingleActivator(
-                    LogicalKeyboardKey.keyC,
-                    includeRepeats: false,
-                  ): () {
-                    onKindOfGameUnitSelection(
-                      orientation: GameUnitOrientation.vertical,
-                    );
-                  },
-                  const SingleActivator(
-                    LogicalKeyboardKey.keyV,
-                    includeRepeats: false,
-                  ): () {
-                    onKindOfGameUnitSelection(
-                      orientation: GameUnitOrientation.horizontal,
-                    );
-                  },
-                  const SingleActivator(
-                    LogicalKeyboardKey.gameButtonX,
-                    includeRepeats: false,
-                  ): () {
-                    onKindOfGameUnitSelection(
-                      size: GameUnitSize.small,
-                    );
-                  },
-                  const SingleActivator(
-                    LogicalKeyboardKey.gameButtonY,
-                    includeRepeats: false,
-                  ): () {
-                    onKindOfGameUnitSelection(
-                      size: GameUnitSize.medium,
-                    );
-                  },
-                  const SingleActivator(
-                    LogicalKeyboardKey.gameButtonB,
-                    includeRepeats: false,
-                  ): () {
-                    onKindOfGameUnitSelection(
-                      size: GameUnitSize.large,
-                    );
-                  },
-                  const SingleActivator(
-                    LogicalKeyboardKey.gameButtonRight2,
-                    includeRepeats: false,
-                  ): () {
-                    onKindOfGameUnitSelection(
-                      orientation: GameUnitOrientation.vertical,
-                    );
-                  },
-                  const SingleActivator(
-                    LogicalKeyboardKey.gameButtonRight1,
-                    includeRepeats: false,
-                  ): () {
-                    onKindOfGameUnitSelection(
-                      orientation: GameUnitOrientation.horizontal,
-                    );
-                  },
-                  const SingleActivator(
-                    LogicalKeyboardKey.gameButtonLeft1,
-                    includeRepeats: false,
-                  ): () {
-                    onKindOfGameUnitSelection(
-                      orientation: GameUnitOrientation.vertical,
-                    );
-                  },
-                  const SingleActivator(
-                    LogicalKeyboardKey.gameButtonLeft2,
-                    includeRepeats: false,
-                  ): () {
-                    onKindOfGameUnitSelection(
-                      orientation: GameUnitOrientation.horizontal,
-                    );
-                  },
-                  const SingleActivator(
-                    LogicalKeyboardKey.gameButtonStart,
-                    includeRepeats: false,
-                  ): () {
-                    context.pop();
-                  },
-                },
-                child: Focus(
-                  autofocus: true,
-                  focusNode: theFocusNode,
-                  child: _SelectorForKindOfGameUnit(
-                    onKindOfGameUnitSelection,
-                    _selectedSize,
-                    _selectedOrientation,
-                    blockedSizes,
+                  child: Focus(
+                    autofocus: true,
+                    focusNode: theFocusNode,
+                    child: _SelectorForKindOfGameUnit(
+                      onKindOfGameUnitSelection,
+                      _selectedSize,
+                      _selectedOrientation,
+                      blockedSizes,
+                    ),
                   ),
                 ),
-              ),
+            },
+          ),
+        ),
         const SizedBox(
           height: 10,
         ),
@@ -399,8 +413,8 @@ class _SelectorForKindOfGameUnit extends StatelessWidget {
           horizontal: 30,
           vertical: 18,
         ),
-        height: 100,
-        width: 600,
+        height: 120,
+        width: 620,
         color: Theme.of(
           context,
         ).bottomAppBarTheme.color,
@@ -467,15 +481,24 @@ class _SelectorForKindOfGameUnit extends StatelessWidget {
                       ? SizedBox(
                           width: draggableSize * 2,
                           height: draggableSize * 2,
-                          child: GameUnitSmall.renderHorizontalUnit,
+                          child: RenderedGameUnit.renderHorizontalUnit(
+                            GameUnitSize.small,
+                          ),
                         )
                       : SizedBox(
                           height: draggableSize * 2,
                           width: draggableSize * 2,
-                          child: GameUnitSmall.renderVerticalUnit,
+                          child: RenderedGameUnit.renderVerticalUnit(
+                            GameUnitSize.small,
+                          ),
                         ),
                 ),
                 child: TextButton(
+                  style: ButtonStyle(
+                    overlayColor: MaterialStateProperty.all<Color>(
+                      Colors.transparent,
+                    ),
+                  ),
                   onPressed: () {
                     onSelect(
                       size: GameUnitSize.small,
@@ -495,10 +518,14 @@ class _SelectorForKindOfGameUnit extends StatelessWidget {
                           : currentSize == GameUnitSize.small
                               ? Theme.of(
                                   context,
-                                ).errorColor
+                                ).colorScheme.inversePrimary.withOpacity(
+                                    0.5,
+                                  )
                               : Theme.of(
                                   context,
-                                ).cardColor,
+                                ).colorScheme.secondary.withOpacity(
+                                    0.6,
+                                  ),
                     ),
                     margin: const EdgeInsets.all(
                       1,
@@ -517,7 +544,7 @@ class _SelectorForKindOfGameUnit extends StatelessWidget {
                             .selectASmallUnit,
                         style: Theme.of(
                           context,
-                        ).textTheme.headline6?.copyWith(
+                        ).textTheme.headlineSmall?.copyWith(
                               color: Theme.of(
                                 context,
                               ).primaryColor,
@@ -587,15 +614,24 @@ class _SelectorForKindOfGameUnit extends StatelessWidget {
                       ? SizedBox(
                           width: draggableSize * 3,
                           height: draggableSize * 3,
-                          child: GameUnitMedium.renderHorizontalUnit,
+                          child: RenderedGameUnit.renderHorizontalUnit(
+                            GameUnitSize.medium,
+                          ),
                         )
                       : SizedBox(
                           height: draggableSize * 3,
                           width: draggableSize * 3,
-                          child: GameUnitMedium.renderVerticalUnit,
+                          child: RenderedGameUnit.renderVerticalUnit(
+                            GameUnitSize.medium,
+                          ),
                         ),
                 ),
                 child: TextButton(
+                  style: ButtonStyle(
+                    overlayColor: MaterialStateProperty.all<Color>(
+                      Colors.transparent,
+                    ),
+                  ),
                   onPressed: () {
                     onSelect(
                       size: GameUnitSize.medium,
@@ -615,10 +651,14 @@ class _SelectorForKindOfGameUnit extends StatelessWidget {
                           : currentSize == GameUnitSize.medium
                               ? Theme.of(
                                   context,
-                                ).errorColor
+                                ).colorScheme.inversePrimary.withOpacity(
+                                    0.5,
+                                  )
                               : Theme.of(
                                   context,
-                                ).cardColor,
+                                ).colorScheme.secondary.withOpacity(
+                                    0.6,
+                                  ),
                     ),
                     margin: const EdgeInsets.all(
                       1,
@@ -637,7 +677,7 @@ class _SelectorForKindOfGameUnit extends StatelessWidget {
                             .selectAMediumUnit,
                         style: Theme.of(
                           context,
-                        ).textTheme.headline6?.copyWith(
+                        ).textTheme.headlineSmall?.copyWith(
                               color: Theme.of(
                                 context,
                               ).primaryColor,
@@ -701,15 +741,24 @@ class _SelectorForKindOfGameUnit extends StatelessWidget {
                       ? SizedBox(
                           width: draggableSize * 4,
                           height: draggableSize * 4,
-                          child: GameUnitLarge.renderHorizontalUnit,
+                          child: RenderedGameUnit.renderHorizontalUnit(
+                            GameUnitSize.large,
+                          ),
                         )
                       : SizedBox(
                           height: draggableSize * 4,
                           width: draggableSize * 4,
-                          child: GameUnitLarge.renderVerticalUnit,
+                          child: RenderedGameUnit.renderVerticalUnit(
+                            GameUnitSize.large,
+                          ),
                         ),
                 ),
                 child: TextButton(
+                  style: ButtonStyle(
+                    overlayColor: MaterialStateProperty.all<Color>(
+                      Colors.transparent,
+                    ),
+                  ),
                   onPressed: () {
                     onSelect(
                       size: GameUnitSize.large,
@@ -729,10 +778,14 @@ class _SelectorForKindOfGameUnit extends StatelessWidget {
                           : currentSize == GameUnitSize.large
                               ? Theme.of(
                                   context,
-                                ).errorColor
+                                ).colorScheme.inversePrimary.withOpacity(
+                                    0.5,
+                                  )
                               : Theme.of(
                                   context,
-                                ).cardColor,
+                                ).colorScheme.secondary.withOpacity(
+                                    0.6,
+                                  ),
                     ),
                     margin: const EdgeInsets.all(
                       1,
@@ -751,7 +804,7 @@ class _SelectorForKindOfGameUnit extends StatelessWidget {
                             .selectALargeUnit,
                         style: Theme.of(
                           context,
-                        ).textTheme.headline6?.copyWith(
+                        ).textTheme.headlineSmall?.copyWith(
                               color: Theme.of(
                                 context,
                               ).primaryColor,
@@ -763,7 +816,7 @@ class _SelectorForKindOfGameUnit extends StatelessWidget {
               ),
             ),
             const SizedBox(
-              width: 25.0,
+              width: 30.0,
             ),
             Expanded(
               child: Draggable(
@@ -849,21 +902,32 @@ class _SelectorForKindOfGameUnit extends StatelessWidget {
                     GameUnitSize.small => SizedBox(
                         width: draggableSize * 2,
                         height: draggableSize * 2,
-                        child: GameUnitSmall.renderVerticalUnit,
+                        child: RenderedGameUnit.renderVerticalUnit(
+                          GameUnitSize.small,
+                        ),
                       ),
                     GameUnitSize.medium => SizedBox(
                         width: draggableSize * 3,
                         height: draggableSize * 3,
-                        child: GameUnitMedium.renderVerticalUnit,
+                        child: RenderedGameUnit.renderVerticalUnit(
+                          GameUnitSize.medium,
+                        ),
                       ),
                     GameUnitSize.large => SizedBox(
                         width: draggableSize * 4,
                         height: draggableSize * 4,
-                        child: GameUnitLarge.renderVerticalUnit,
+                        child: RenderedGameUnit.renderVerticalUnit(
+                          GameUnitSize.large,
+                        ),
                       ),
                   },
                 ),
                 child: TextButton(
+                  style: ButtonStyle(
+                    overlayColor: MaterialStateProperty.all<Color>(
+                      Colors.transparent,
+                    ),
+                  ),
                   onPressed: () {
                     onSelect(
                       orientation: GameUnitOrientation.vertical,
@@ -877,8 +941,16 @@ class _SelectorForKindOfGameUnit extends StatelessWidget {
                         ),
                       ),
                       color: currentOrientation == GameUnitOrientation.vertical
-                          ? Theme.of(context).errorColor
-                          : Theme.of(context).cardColor,
+                          ? Theme.of(
+                              context,
+                            ).colorScheme.inversePrimary.withOpacity(
+                                0.5,
+                              )
+                          : Theme.of(
+                              context,
+                            ).colorScheme.secondary.withOpacity(
+                                0.6,
+                              ),
                     ),
                     margin: const EdgeInsets.all(
                       1,
@@ -897,7 +969,7 @@ class _SelectorForKindOfGameUnit extends StatelessWidget {
                             .selectTheVerticalOrientation,
                         style: Theme.of(
                           context,
-                        ).textTheme.headline6?.copyWith(
+                        ).textTheme.headlineSmall?.copyWith(
                               color: Theme.of(
                                 context,
                               ).primaryColor,
@@ -987,21 +1059,32 @@ class _SelectorForKindOfGameUnit extends StatelessWidget {
                     GameUnitSize.small => SizedBox(
                         width: draggableSize * 2,
                         height: draggableSize * 2,
-                        child: GameUnitSmall.renderHorizontalUnit,
+                        child: RenderedGameUnit.renderHorizontalUnit(
+                          GameUnitSize.small,
+                        ),
                       ),
                     GameUnitSize.medium => SizedBox(
                         width: draggableSize * 3,
                         height: draggableSize * 3,
-                        child: GameUnitMedium.renderHorizontalUnit,
+                        child: RenderedGameUnit.renderHorizontalUnit(
+                          GameUnitSize.medium,
+                        ),
                       ),
                     GameUnitSize.large => SizedBox(
                         width: draggableSize * 4,
                         height: draggableSize * 4,
-                        child: GameUnitLarge.renderHorizontalUnit,
+                        child: RenderedGameUnit.renderHorizontalUnit(
+                          GameUnitSize.large,
+                        ),
                       ),
                   },
                 ),
                 child: TextButton(
+                  style: ButtonStyle(
+                    overlayColor: MaterialStateProperty.all<Color>(
+                      Colors.transparent,
+                    ),
+                  ),
                   onPressed: () {
                     onSelect(
                       orientation: GameUnitOrientation.horizontal,
@@ -1018,10 +1101,14 @@ class _SelectorForKindOfGameUnit extends StatelessWidget {
                           currentOrientation == GameUnitOrientation.horizontal
                               ? Theme.of(
                                   context,
-                                ).errorColor
+                                ).colorScheme.inversePrimary.withOpacity(
+                                    0.5,
+                                  )
                               : Theme.of(
                                   context,
-                                ).cardColor,
+                                ).colorScheme.secondary.withOpacity(
+                                    0.6,
+                                  ),
                     ),
                     margin: const EdgeInsets.all(
                       1,
@@ -1040,7 +1127,7 @@ class _SelectorForKindOfGameUnit extends StatelessWidget {
                             .selectTheHorizontalOrientation,
                         style: Theme.of(
                           context,
-                        ).textTheme.headline6?.copyWith(
+                        ).textTheme.headlineSmall?.copyWith(
                               color: Theme.of(
                                 context,
                               ).primaryColor,

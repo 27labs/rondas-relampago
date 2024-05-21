@@ -1,5 +1,6 @@
 import 'dart:io';
 // import 'package:flutter/foundation.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -31,10 +32,29 @@ class ScreenTitleSoloState extends State<ScreenTitleSolo> {
   GameAudioSettings _volume = GameAudioSettings.soundOn;
 
   @override
+  void _loadAd() async {
+    await PreloadedAds.preloadSingleAd(
+      // AdKind.nativePlatform,
+      // () => setState(
+      //   () {
+      //     _nativeAd = PreloadedAds.ads.nativePlatform.last;
+      //   },
+      // ),
+      AdKind.adaptiveBanner,
+      () => setState(
+        () {
+          _bannerAd = PreloadedAds.ads.adaptiveBanner.last;
+        },
+      ),
+    );
+  }
+
+  @override
   void initState() {
     super.initState();
     widget.onVolumeToggled();
     _volume = widget.onVolumeToggled();
+    _loadAd();
   }
 
   @override
@@ -50,6 +70,11 @@ class ScreenTitleSoloState extends State<ScreenTitleSolo> {
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
             TextButton(
+              style: ButtonStyle(
+                overlayColor: WidgetStateProperty.all<Color>(
+                  Colors.transparent,
+                ),
+              ),
               onPressed: () {
                 context.pop();
               },
@@ -73,21 +98,39 @@ class ScreenTitleSoloState extends State<ScreenTitleSolo> {
               ),
             ),
             Expanded(
-              child: (Platform.isAndroid || Platform.isIOS) &&
-                      // !kDebugMode &&
-                      _bannerAd != null
-                  ? Padding(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 15,
-                      ),
-                      child: SizedBox(
-                        height: AdSize.banner.height.toDouble(),
-                        width: AdSize.banner.width.toDouble(),
-                        child: AdWidget(
-                          ad: _bannerAd!,
-                        ),
-                      ),
-                    )
+              child: !kIsWeb
+                  ? (Platform.isAndroid || Platform.isIOS) &&
+                          // !kDebugMode &&
+                          _bannerAd != null
+                      ? Padding(
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 15,
+                          ),
+                          child: SizedBox(
+                            height: AdSize.banner.height.toDouble(),
+                            width: AdSize.banner.width.toDouble(),
+                            child: AdWidget(
+                              ad: _bannerAd!,
+                            ),
+                          ),
+                        )
+                      : FittedBox(
+                          child: Padding(
+                            padding: const EdgeInsets.all(
+                              8.0,
+                            ),
+                            child: Text(
+                              widget.title,
+                              style: Theme.of(
+                                context,
+                              ).textTheme.headlineSmall!.copyWith(
+                                    color: Theme.of(
+                                      context,
+                                    ).primaryColor,
+                                  ),
+                            ),
+                          ),
+                        )
                   : FittedBox(
                       child: Padding(
                         padding: const EdgeInsets.all(
@@ -97,7 +140,7 @@ class ScreenTitleSoloState extends State<ScreenTitleSolo> {
                           widget.title,
                           style: Theme.of(
                             context,
-                          ).textTheme.headline5!.copyWith(
+                          ).textTheme.headlineSmall!.copyWith(
                                 color: Theme.of(
                                   context,
                                 ).primaryColor,
@@ -107,6 +150,11 @@ class ScreenTitleSoloState extends State<ScreenTitleSolo> {
                     ),
             ),
             TextButton(
+              style: ButtonStyle(
+                overlayColor: MaterialStateProperty.all<Color>(
+                  Colors.transparent,
+                ),
+              ),
               onPressed: () {
                 setState(() {
                   _volume = widget.onVolumeToggled();
@@ -167,7 +215,7 @@ class ScreenTitleSoloState extends State<ScreenTitleSolo> {
                     .results,
                 style: Theme.of(
                   context,
-                ).textTheme.headline4?.copyWith(
+                ).textTheme.headlineMedium?.copyWith(
                       color: Theme.of(
                         context,
                       ).primaryColor,
@@ -177,6 +225,11 @@ class ScreenTitleSoloState extends State<ScreenTitleSolo> {
             ),
           ),
           TextButton(
+            style: ButtonStyle(
+              overlayColor: MaterialStateProperty.all<Color>(
+                Colors.transparent,
+              ),
+            ),
             onPressed: () {
               setState(() {
                 _volume = widget.onVolumeToggled();
@@ -252,6 +305,11 @@ class ScreenTitleState extends State<ScreenTitle> {
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
             TextButton(
+              style: ButtonStyle(
+                overlayColor: MaterialStateProperty.all<Color>(
+                  Colors.transparent,
+                ),
+              ),
               onPressed: () {
                 context.pop();
               },
@@ -284,7 +342,7 @@ class ScreenTitleState extends State<ScreenTitle> {
                     widget.title,
                     style: Theme.of(
                       context,
-                    ).textTheme.headline5!.copyWith(
+                    ).textTheme.headlineSmall!.copyWith(
                           color: Theme.of(
                             context,
                           ).primaryColor,
@@ -294,6 +352,11 @@ class ScreenTitleState extends State<ScreenTitle> {
               ),
             ),
             TextButton(
+              style: ButtonStyle(
+                overlayColor: MaterialStateProperty.all<Color>(
+                  Colors.transparent,
+                ),
+              ),
               onPressed: () {
                 setState(() {
                   _volume = widget.onVolumeToggled();
@@ -354,7 +417,7 @@ class ScreenTitleState extends State<ScreenTitle> {
                     .results,
                 style: Theme.of(
                   context,
-                ).textTheme.headline4?.copyWith(
+                ).textTheme.headlineMedium?.copyWith(
                       color: Theme.of(
                         context,
                       ).primaryColor,
@@ -364,6 +427,11 @@ class ScreenTitleState extends State<ScreenTitle> {
             ),
           ),
           TextButton(
+            style: ButtonStyle(
+              overlayColor: MaterialStateProperty.all<Color>(
+                Colors.transparent,
+              ),
+            ),
             onPressed: () {
               setState(() {
                 _volume = widget.onVolumeToggled();
@@ -449,7 +517,7 @@ class MenuScreenTitleState extends State<MenuScreenTitle> {
                   widget.title,
                   style: Theme.of(
                     context,
-                  ).textTheme.headline5?.copyWith(
+                  ).textTheme.headlineSmall?.copyWith(
                         color: Theme.of(
                           context,
                         ).primaryColor,
@@ -467,6 +535,11 @@ class MenuScreenTitleState extends State<MenuScreenTitle> {
               10,
             ),
             child: TextButton(
+              style: ButtonStyle(
+                overlayColor: MaterialStateProperty.all<Color>(
+                  Colors.transparent,
+                ),
+              ),
               onPressed: () {
                 setState(() {
                   _volume = widget.onVolumeToggled();

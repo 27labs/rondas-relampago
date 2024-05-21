@@ -3,10 +3,12 @@ import 'package:rondas_relampago/source/models/gameplay/game_units/game_unit.dar
 
 class MarksPainter extends StatelessWidget {
   final Set<GameMarker> marksOnBoard;
+  final Set<GameMarker> hitboxes;
   final int boardRows;
   final int boardColumns;
   const MarksPainter(
     this.marksOnBoard, {
+    this.hitboxes = const {},
     required this.boardRows,
     required this.boardColumns,
     super.key,
@@ -32,9 +34,14 @@ class MarksPainter extends StatelessWidget {
               size: Size.infinite,
               painter: _TargetMarkPainter(
                 square,
-                Theme.of(
-                  context,
-                ).primaryColor,
+                switch (hitboxes.contains(square)) {
+                  false => Theme.of(
+                      context,
+                    ).primaryColor,
+                  true => Theme.of(
+                      context,
+                    ).colorScheme.onPrimaryContainer.withOpacity(0.9),
+                },
                 rows: boardRows,
                 columns: boardColumns,
               ),

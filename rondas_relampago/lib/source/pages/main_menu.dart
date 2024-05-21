@@ -1,9 +1,11 @@
 import 'dart:io';
 // import 'package:flutter/foundation.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:rondas_relampago/source/models/audio/audio_controller.dart';
+import 'package:rondas_relampago/source/models/gameplay/game_units/paints.dart';
 // import 'package:provider/provider.dart';
 // import 'package:rondas_relampago/source/pages/utils/change_notifiers.dart';
 import 'package:url_launcher/url_launcher_string.dart';
@@ -63,7 +65,7 @@ class MainMenuState extends State<MainMenu> {
           context,
         ).colorScheme.onPrimaryContainer,
         body: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             MenuScreenTitle(
               AppLocalizations.of(
@@ -72,43 +74,80 @@ class MainMenuState extends State<MainMenu> {
                   .gameName,
               onVolumeToggled: widget.onVolumeToggled,
             ),
-            _MenuThemePicker(
-              onThemeSelected: _onThemeSelected,
-              activeTheme: _activeTheme,
+            Expanded(
+              // flex: 100,
+              child: SizedBox(
+                height: 320,
+                width: double.infinity,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Flexible(
+                      child: _MenuThemePicker(
+                        onThemeSelected: _onThemeSelected,
+                        activeTheme: _activeTheme,
+                      ),
+                    ),
+                    // _gap,
+                    Expanded(
+                      child: _MenuItem(
+                        AppLocalizations.of(
+                          context,
+                        )!
+                            .singlePlayerMode,
+                        route: RouteNames.casualPlay.name,
+                        color: _activeTheme.seedColor,
+                      ),
+                    ),
+                    // _gap,
+                    Expanded(
+                      child: _MenuItem(
+                        AppLocalizations.of(
+                          context,
+                        )!
+                            .casualMode,
+                        route: RouteNames.casualPairPlay.name,
+                        color: _activeTheme.seedColor,
+                      ),
+                    ),
+                    // _gap,
+                    Expanded(
+                      child: _MenuItem(
+                        AppLocalizations.of(
+                          context,
+                        )!
+                            .onlineCasualMode,
+                        route: null, // RouteNames.onlinePlay.name,
+                        color: Colors.black,
+                      ),
+                    ),
+                    // _gap,
+                    const _AdSection(),
+                  ],
+                ),
+              ),
             ),
-            _gap,
-            _MenuItem(
-              AppLocalizations.of(
-                context,
-              )!
-                  .singlePlayerMode,
-              route: RouteNames.casualPlay.name,
-              color: _activeTheme.seedColor,
+            const SizedBox(
+              height: 15,
             ),
-            _gap,
-            _MenuItem(
-              AppLocalizations.of(
-                context,
-              )!
-                  .casualMode,
-              route: RouteNames.casualPairPlay.name,
-              color: _activeTheme.seedColor,
-            ),
-            _gap,
-            _MenuItem(
-              AppLocalizations.of(
-                context,
-              )!
-                  .competitiveMode,
-              route: 'competitive_mode',
-              color: _activeTheme.seedColor,
-            ),
-            _gap,
-            const _AdSection(),
             _GameStatistics(
               getCasualWins: widget.getCasualWins,
             ),
             TextButton(
+              style: ButtonStyle(
+                textStyle: WidgetStateProperty.all<TextStyle>(
+                  Theme.of(context)
+                      .textTheme
+                      .labelSmall!
+                      .copyWith(color: Theme.of(context).colorScheme.primary),
+                ),
+                overlayColor: WidgetStateProperty.all<Color>(
+                  Colors.transparent,
+                ),
+                fixedSize: WidgetStateProperty.all<Size>(
+                  Size(164, 10),
+                ),
+              ),
               onPressed: () {
                 launchUrlString(
                   "https://rondas-relampago.web.app/privacy.html",
@@ -121,14 +160,16 @@ class MainMenuState extends State<MainMenu> {
                     .privacyPolicy,
               ),
             ),
-            _gap,
+            const SizedBox(
+              height: 9,
+            ),
           ],
         ),
       );
 }
 
 class _MenuItem extends StatelessWidget {
-  final String route;
+  final String? route;
   final String buttonText;
   final Color color;
   const _MenuItem(
@@ -142,36 +183,39 @@ class _MenuItem extends StatelessWidget {
   Widget build(
     BuildContext context,
   ) =>
-      Expanded(
-        child: TextButton(
-          onPressed: () => context.pushNamed(
-            route,
+      TextButton(
+        onPressed: () => route != null
+            ? context.pushNamed(
+                route!,
+              )
+            : () {},
+        style: ButtonStyle(
+          overlayColor: MaterialStateProperty.all<Color>(
+            Colors.transparent,
           ),
-          style: TextButton.styleFrom(
-            textStyle: Theme.of(
+          textStyle: MaterialStateProperty.all<TextStyle?>(
+            Theme.of(
               context,
-            ).textTheme.headlineSmall,
-            // primary: Theme.of(context).primaryColor,
-            // onSurface: const Color.fromARGB(0, 0, 0, 0),
+            ).textTheme.titleMedium,
           ),
-          child: Container(
-            height: double.infinity,
-            width: double.infinity,
-            margin: const EdgeInsets.symmetric(
-              horizontal: 20,
-            ),
-            decoration: BoxDecoration(
-              color: color,
-              borderRadius: const BorderRadius.all(
-                Radius.circular(
-                  10,
-                ),
+        ),
+        child: Container(
+          height: double.infinity,
+          width: double.infinity,
+          margin: const EdgeInsets.symmetric(
+            horizontal: 15,
+          ),
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: const BorderRadius.all(
+              Radius.circular(
+                10,
               ),
             ),
-            child: Center(
-              child: Text(
-                buttonText,
-              ),
+          ),
+          child: Center(
+            child: Text(
+              buttonText,
             ),
           ),
         ),
@@ -187,139 +231,147 @@ class _MenuThemePicker extends StatelessWidget {
     super.key,
   });
 
+  static const _shrink = 0.7;
+
   @override
   Widget build(
     context,
   ) =>
       FittedBox(
         fit: BoxFit.contain,
-        child: Row(
-          children: [
-            Text(
-              '• ${AppLocalizations.of(
-                context,
-              )!.themeWord}: ',
-              style: Theme.of(
-                context,
-              ).textTheme.headline6?.copyWith(
+        child: SizedBox(
+          height: 65 * _shrink,
+          width: 300 * _shrink,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                '• ${AppLocalizations.of(
+                  context,
+                )!.themeWord}: ',
+                style: Theme.of(
+                  context,
+                ).textTheme.labelLarge?.copyWith(
+                      color: Theme.of(
+                        context,
+                      ).primaryColor,
+                    ),
+              ),
+              DropdownButton(
+                borderRadius: BorderRadius.circular(
+                  10.0,
+                ),
+                alignment: AlignmentDirectional.bottomStart,
+                value: activeTheme,
+                dropdownColor: activeTheme.seedColor,
+                icon: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 5.0,
+                  ),
+                  child: Icon(
+                    Icons.brush_outlined,
                     color: Theme.of(
                       context,
                     ).primaryColor,
+                    size: 22,
                   ),
-            ),
-            DropdownButton(
-              borderRadius: BorderRadius.circular(
-                10.0,
+                ),
+                items: [
+                  DropdownMenuItem(
+                    value: RGBThemes.blue,
+                    child: Padding(
+                      padding: const EdgeInsets.all(
+                        5.0,
+                      ),
+                      child: Text(
+                        AppLocalizations.of(
+                          context,
+                        )!
+                            .blue,
+                        semanticsLabel: AppLocalizations.of(
+                          context,
+                        )!
+                            .blueTheme,
+                        style: Theme.of(
+                          context,
+                        ).textTheme.labelLarge?.copyWith(
+                              color: Theme.of(
+                                context,
+                              ).primaryColor,
+                            ),
+                      ),
+                    ),
+                  ),
+                  DropdownMenuItem(
+                    value: RGBThemes.green,
+                    child: Padding(
+                      padding: const EdgeInsets.all(
+                        5.0,
+                      ),
+                      child: Text(
+                        AppLocalizations.of(
+                          context,
+                        )!
+                            .green,
+                        semanticsLabel: AppLocalizations.of(
+                          context,
+                        )!
+                            .greenTheme,
+                        style: Theme.of(
+                          context,
+                        ).textTheme.labelLarge?.copyWith(
+                              color: Theme.of(
+                                context,
+                              ).primaryColor,
+                            ),
+                      ),
+                    ),
+                  ),
+                  DropdownMenuItem(
+                    value: RGBThemes.red,
+                    child: Padding(
+                      padding: const EdgeInsets.all(
+                        5.0,
+                      ),
+                      child: Text(
+                        AppLocalizations.of(
+                          context,
+                        )!
+                            .red,
+                        semanticsLabel: AppLocalizations.of(
+                          context,
+                        )!
+                            .redTheme,
+                        style: Theme.of(
+                          context,
+                        ).textTheme.labelLarge?.copyWith(
+                              color: Theme.of(
+                                context,
+                              ).primaryColor,
+                            ),
+                      ),
+                    ),
+                  ),
+                ],
+                onChanged: (
+                  theme,
+                ) =>
+                    onThemeSelected(
+                  theme ?? RGBThemes.blue,
+                ),
               ),
-              alignment: AlignmentDirectional.bottomStart,
-              value: activeTheme,
-              dropdownColor: activeTheme.seedColor,
-              icon: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 5.0,
-                ),
-                child: Icon(
-                  Icons.brush_outlined,
-                  color: Theme.of(
-                    context,
-                  ).primaryColor,
-                ),
+              Text(
+                ' •',
+                style: Theme.of(
+                  context,
+                ).textTheme.labelLarge?.copyWith(
+                      color: Theme.of(
+                        context,
+                      ).primaryColor,
+                    ),
               ),
-              items: [
-                DropdownMenuItem(
-                  value: RGBThemes.blue,
-                  child: Padding(
-                    padding: const EdgeInsets.all(
-                      10.0,
-                    ),
-                    child: Text(
-                      AppLocalizations.of(
-                        context,
-                      )!
-                          .blue,
-                      semanticsLabel: AppLocalizations.of(
-                        context,
-                      )!
-                          .blueTheme,
-                      style: Theme.of(
-                        context,
-                      ).textTheme.headline6?.copyWith(
-                            color: Theme.of(
-                              context,
-                            ).primaryColor,
-                          ),
-                    ),
-                  ),
-                ),
-                DropdownMenuItem(
-                  value: RGBThemes.green,
-                  child: Padding(
-                    padding: const EdgeInsets.all(
-                      10.0,
-                    ),
-                    child: Text(
-                      AppLocalizations.of(
-                        context,
-                      )!
-                          .green,
-                      semanticsLabel: AppLocalizations.of(
-                        context,
-                      )!
-                          .greenTheme,
-                      style: Theme.of(
-                        context,
-                      ).textTheme.headline6?.copyWith(
-                            color: Theme.of(
-                              context,
-                            ).primaryColor,
-                          ),
-                    ),
-                  ),
-                ),
-                DropdownMenuItem(
-                  value: RGBThemes.red,
-                  child: Padding(
-                    padding: const EdgeInsets.all(
-                      10.0,
-                    ),
-                    child: Text(
-                      AppLocalizations.of(
-                        context,
-                      )!
-                          .red,
-                      semanticsLabel: AppLocalizations.of(
-                        context,
-                      )!
-                          .redTheme,
-                      style: Theme.of(
-                        context,
-                      ).textTheme.headline6?.copyWith(
-                            color: Theme.of(
-                              context,
-                            ).primaryColor,
-                          ),
-                    ),
-                  ),
-                ),
-              ],
-              onChanged: (
-                theme,
-              ) =>
-                  onThemeSelected(
-                theme ?? RGBThemes.blue,
-              ),
-            ),
-            Text(
-              ' •',
-              style: Theme.of(
-                context,
-              ).textTheme.headline6?.copyWith(
-                    color: Theme.of(
-                      context,
-                    ).primaryColor,
-                  ),
-            ),
-          ],
+            ],
+          ),
         ),
       );
 }
@@ -335,68 +387,112 @@ class _AdSection extends StatefulWidget {
 
 class _AdSectionState extends State<_AdSection> {
   BannerAd? _bannerAd;
+  // NativeAd? _nativeAd;
+
+  void _loadAd() async {
+    await PreloadedAds.preloadSingleAd(
+      // AdKind.nativePlatform,
+      // () => setState(
+      //   () {
+      //     _nativeAd = PreloadedAds.ads.nativePlatform.last;
+      //   },
+      // ),
+      AdKind.mediumRectangleBanner,
+      () => setState(
+        () {
+          _bannerAd = PreloadedAds.ads.mediumRectangleBanner.last;
+        },
+      ),
+    );
+  }
+
+  static const _margin = SizedBox(
+    width: 15.0,
+  );
 
   @override
   void initState() {
     super.initState();
     // TODO: fetchAd()
+    if (!kIsWeb) _loadAd();
   }
 
   @override
   Widget build(
     context,
   ) => // kDebugMode ||
-      !(Platform.isAndroid || Platform.isIOS)
-          ? const SizedBox()
-          : Platform.isAndroid
-              ? Expanded(
-                  child: Column(
-                    children: [
-                      Expanded(
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          mainAxisSize: MainAxisSize.max,
-                          children: [
-                            SizedBox(
-                              width: AdSize.mediumRectangle.width.toDouble(),
-                              height: 350,
-                              child: _bannerAd != null
-                                  ? AdWidget(
-                                      ad: _bannerAd!,
-                                    )
-                                  : null,
-                            ),
-                            const SizedBox(
-                              width: 20,
-                            ),
-                            Center(
-                              child: IconButton(
-                                iconSize: 25,
-                                onPressed: () {
-                                  showDialog(
-                                    context: context,
-                                    builder: (
-                                      innerContext,
-                                    ) =>
-                                        const ContentPromptDialog(),
-                                  );
-                                },
-                                icon: Icon(
-                                  Icons.refresh_rounded,
-                                  color: Theme.of(
-                                    context,
-                                  ).primaryColor,
+      !kIsWeb
+          ? !(Platform.isAndroid || Platform.isIOS)
+              ? const SizedBox()
+              : Platform.isAndroid
+                  ? Expanded(
+                      child: Column(
+                        children: [
+                          Expanded(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              mainAxisSize: MainAxisSize.max,
+                              children: [
+                                _margin,
+                                Expanded(
+                                  child: SizedBox(
+                                    width:
+                                        AdSize.mediumRectangle.width.toDouble(),
+                                    height: 350,
+                                    // child: _nativeAd != null
+                                    //     ? AdWidget(
+                                    //         ad: _nativeAd!,
+                                    //       )
+                                    //     : null,
+                                    child: _bannerAd != null
+                                        ? AdWidget(
+                                            ad: _bannerAd!,
+                                          )
+                                        : null,
+                                  ),
                                 ),
-                              ),
+                                _margin,
+                                // const SizedBox(
+                                //   width: 5,
+                                // ),
+                                Center(
+                                  child: IconButton(
+                                    iconSize: 25,
+                                    onPressed: () {
+                                      showDialog(
+                                        context: context,
+                                        builder: (
+                                          innerContext,
+                                        ) =>
+                                            const ContentPromptDialog(),
+                                      ).then((
+                                        value,
+                                      ) {
+                                        setState(() {
+                                          // _nativeAd = null;
+                                          _bannerAd = null;
+                                        });
+                                        _loadAd();
+                                      });
+                                    },
+                                    icon: Icon(
+                                      Icons.refresh_rounded,
+                                      color: Theme.of(
+                                        context,
+                                      ).primaryColor,
+                                    ),
+                                  ),
+                                ),
+                                _margin,
+                              ],
                             ),
-                          ],
-                        ),
+                          ),
+                          // _gap,
+                        ],
                       ),
-                      _gap,
-                    ],
-                  ),
-                )
-              : const SizedBox();
+                    )
+                  : const SizedBox()
+          : const SizedBox();
 }
 
 class _GameStatistics extends StatelessWidget {
@@ -411,8 +507,8 @@ class _GameStatistics extends StatelessWidget {
     context,
   ) =>
       SizedBox(
-        height: _gap.height! * 3,
-        width: _gap.width,
+        height: 30,
+        // width: _gap.width,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -420,7 +516,7 @@ class _GameStatistics extends StatelessWidget {
               '• ',
               style: Theme.of(
                 context,
-              ).textTheme.headline6?.copyWith(
+              ).textTheme.labelLarge?.copyWith(
                     color: Theme.of(
                       context,
                     ).primaryColor,
@@ -433,7 +529,7 @@ class _GameStatistics extends StatelessWidget {
                   .winsCounterText,
               style: Theme.of(
                 context,
-              ).textTheme.headline6?.copyWith(
+              ).textTheme.labelLarge?.copyWith(
                     color: Theme.of(
                       context,
                     ).primaryColor,
@@ -443,7 +539,7 @@ class _GameStatistics extends StatelessWidget {
               (getCasualWins() ?? 0).toString(),
               style: Theme.of(
                 context,
-              ).textTheme.headline6?.copyWith(
+              ).textTheme.labelLarge?.copyWith(
                     color: Theme.of(
                       context,
                     ).primaryColor,
@@ -453,7 +549,7 @@ class _GameStatistics extends StatelessWidget {
               ' • ',
               style: Theme.of(
                 context,
-              ).textTheme.headline6?.copyWith(
+              ).textTheme.labelLarge?.copyWith(
                     color: Theme.of(
                       context,
                     ).primaryColor,
@@ -479,6 +575,9 @@ class _GameStatistics extends StatelessWidget {
       );
 }
 
-const _gap = SizedBox(
-  height: 20,
-);
+// const _gap = Flexible(
+//   flex: 5,
+//   child: SizedBox(
+//     height: 25,
+//   ),
+// );

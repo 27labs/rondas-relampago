@@ -21,7 +21,9 @@ sealed class MatchUnits {
 
   Set<GameMarker> get hitBoxes;
 
-  GameUnit? collided(GameMarker hitBox);
+  GameUnit? collided(
+    GameMarker hitBox,
+  );
 
   factory MatchUnits.add(
     MatchUnits state,
@@ -39,9 +41,66 @@ sealed class MatchUnits {
     GameMarker hitBox,
   ) =>
       switch (state) {
-        CasualMatchUnits() => CasualMatchUnits.copyWith(state, hitBox: hitBox),
+        CasualMatchUnits() => CasualMatchUnits.copyWith(
+            state,
+            hitBox: hitBox,
+          ),
+      };
+
+  Map<String, dynamic> toJson(
+    MatchUnits units,
+  );
+
+  factory MatchUnits.fromJson(
+    Map<String, dynamic> json,
+  ) =>
+      switch (MatchUnitsTypes.fromJson(
+        json['type'],
+      )) {
+        MatchUnitsTypes.casualMatchUnits =>
+          CasualMatchUnits.fromJson(json['units']),
+        _ => throw (InvalidMatchUnitsTypeException)
       };
 }
+
+enum MatchUnitsTypes {
+  casualMatchUnits('Casual');
+
+  final String value;
+
+  String toJson() => value;
+
+  static MatchUnitsTypes? fromJson(
+    String json,
+  ) {
+    switch (json) {
+      case "Casual":
+        return MatchUnitsTypes.casualMatchUnits;
+      default:
+        throw (InvalidMatchUnitsTypeException);
+    }
+  }
+
+  const MatchUnitsTypes(this.value);
+}
+
+// class GameUnitSerializableData {
+//   final List<GameUnit> data;
+//   const GameUnitSerializableData(
+//     this.data,
+//   );
+
+//   Map<String, dynamic> toJson(
+//     List<GameUnit> units,
+//   ) =>
+//       {
+//         'units': units,
+//       };
+
+//   MatchMessage.fromJson(
+//     Map<String, dynamic> json,
+//   ) : textMessage = json['message'];
+// }
 
 class CasualMatchUnits implements MatchUnits {
   @override
@@ -123,18 +182,36 @@ class CasualMatchUnits implements MatchUnits {
     GameUnit? unit,
     GameMarker? hitBox,
   }) : _data = switch (unit) {
-          GameUnitSmall() => (
+          // RenderedGameUnit<GameUnitSmall>(
+          //   :final gameUnit,
+          // ) ||
+          GameUnitSmall(
+            :final gameUnit,
+          ) =>
+            (
               base._data.$1,
               base._data.$2,
-              base._data.$3 ?? unit,
+              base._data.$3 ?? gameUnit,
             ),
-          GameUnitMedium() => (
+          // RenderedGameUnit<GameUnitMedium>(
+          //   :final gameUnit,
+          // ) ||
+          GameUnitMedium(
+            :final gameUnit,
+          ) =>
+            (
               base._data.$1,
-              base._data.$2 ?? unit,
+              base._data.$2 ?? gameUnit,
               base._data.$3,
             ),
-          GameUnitLarge() => (
-              base._data.$1 ?? unit,
+          // RenderedGameUnit<GameUnitLarge>(
+          //   :final gameUnit,
+          // ) ||
+          GameUnitLarge(
+            :final gameUnit,
+          ) =>
+            (
+              base._data.$1 ?? gameUnit,
               base._data.$2,
               base._data.$3,
             ),
@@ -161,7 +238,41 @@ class CasualMatchUnits implements MatchUnits {
                       ? null
                       : base._data.$3
             ),
+          _ => base._data,
         };
+
+  CasualMatchUnits.fromJson(
+    Map<String, dynamic> json,
+  ) : _data = (
+          GameUnit.fromJson(json['largeUnit']) as GameUnitLarge?,
+          // switch (json['largeUnit']) {
+          //   Map unit =>
+          //     GameUnitLarge(unit['x'], unit['y'], unit['orientation']),
+          //   _ => null,
+          // },
+          GameUnit.fromJson(json['mediumUnit']) as GameUnitMedium?,
+          // switch (json['mediumUnit']) {
+          //   Map unit =>
+          //     GameUnitMedium(unit['x'], unit['y'], unit['orientation']),
+          //   _ => null,
+          // },
+          GameUnit.fromJson(json['smallUnit']) as GameUnitSmall?,
+          // switch (json['smallUnit']) {
+          //   Map unit =>
+          //     GameUnitSmall(unit['x'], unit['y'], unit['orientation']),
+          //   _ => null,
+          // },
+        );
+
+  @override
+  toJson(
+    MatchUnits units,
+  ) =>
+      {
+        'largeUnit': _data.$1,
+        'mediumUnit': _data.$2,
+        'smallUnit': _data.$3,
+      };
 }
 
 typedef CasualMatchMarkers = Set<GameMarker>;
@@ -245,3 +356,5 @@ typedef MatchMarkers = Set<GameMarker>;
 class OutOfBoundsException implements Exception {}
 
 class MarkersLimitReachedException implements Exception {}
+
+sealed class InvalidMatchUnitsTypeException implements Exception {}

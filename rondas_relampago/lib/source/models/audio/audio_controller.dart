@@ -3,6 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'package:audioplayers/audioplayers.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 // Owned
@@ -52,15 +53,21 @@ class AudioController {
   GameAudioSettings sound = GameAudioSettings.soundOff;
 
   /// Preloads all sound effects.
-  void initialize(GameAudioSettings setting) async {
+  Future<bool> initialize(GameAudioSettings setting,
+      [bool forced = false]) async {
     // _log.info('Preloading sound effects');
     // This assumes there is only a limited number of sound effects in the game.
     // If there are hundreds of long sound effect files, it's better
     // to be more selective when preloading.
     sound = setting;
 
-    await _musicPlayer.play(AssetSource('songs/RR-01B_(Faded).wav'));
-    if (sound.muted) await _musicPlayer.pause();
+    if (!kIsWeb || forced) {
+      await _musicPlayer.play(AssetSource('songs/GYMKANA A.wav'));
+      if (sound.muted) await _musicPlayer.pause();
+      return true;
+    }
+
+    return false;
   }
 
   /// Plays a single sound effect, defined by [type].

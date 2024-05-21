@@ -4,9 +4,9 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 
 // Owned
+import 'package:game_common/game_common.dart';
 import 'package:rondas_relampago/source/models/gameplay/board_sizes.dart';
 import 'package:rondas_relampago/source/models/gameplay/game_units/game_unit.dart';
-import 'package:rondas_relampago/source/models/gameplay/gameplay_features.dart';
 import 'package:rondas_relampago/source/models/gameplay/marker_painter.dart';
 import 'package:rondas_relampago/source/views/game_table.dart';
 
@@ -93,9 +93,11 @@ class MarkerPlacementView extends StatelessWidget {
           ),
         ),
         Container(
-          margin: const EdgeInsets.all(
-            10,
+          margin: const EdgeInsets.symmetric(
+            vertical: 12,
+            horizontal: 10,
           ),
+          height: 60,
           child: FittedBox(
             fit: BoxFit.contain,
             child: Row(
@@ -110,7 +112,7 @@ class MarkerPlacementView extends StatelessWidget {
                           .markersLeft,
                       style: Theme.of(
                         context,
-                      ).textTheme.headline6!.copyWith(
+                      ).textTheme.headlineSmall!.copyWith(
                             color: Theme.of(
                               context,
                             ).primaryColor,
@@ -124,7 +126,7 @@ class MarkerPlacementView extends StatelessWidget {
                       ).textTheme.headlineSmall!.copyWith(
                             color: Theme.of(
                               context,
-                            ).errorColor,
+                            ).colorScheme.inversePrimary.withOpacity(0.9),
                           ),
                     ),
                   ],
@@ -160,6 +162,11 @@ class MarkerPlacementView extends StatelessWidget {
                         child: Focus(
                           focusNode: theFocusNode,
                           child: TextButton(
+                            style: ButtonStyle(
+                              overlayColor: MaterialStateProperty.all<Color>(
+                                Colors.transparent,
+                              ),
+                            ),
                             onPressed: () {
                               onDone();
                             },
@@ -172,13 +179,16 @@ class MarkerPlacementView extends StatelessWidget {
                                 ),
                                 color: Theme.of(
                                   context,
-                                ).errorColor,
+                                ).colorScheme.inversePrimary.withOpacity(
+                                      0.5,
+                                    ),
                               ),
                               margin: const EdgeInsets.only(
                                 left: 15,
                               ),
-                              padding: const EdgeInsets.all(
-                                10,
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 10,
+                                horizontal: 20,
                               ),
                               child: Text(
                                 AppLocalizations.of(
@@ -209,23 +219,27 @@ class MarkerPlacementView extends StatelessWidget {
                         child: Focus(
                           focusNode: theFocusNode,
                           child: TextButton(
+                            style: ButtonStyle(
+                              overlayColor: MaterialStateProperty.all<Color>(
+                                Colors.transparent,
+                              ),
+                            ),
                             onPressed: () {},
                             child: Container(
-                              decoration: BoxDecoration(
-                                borderRadius: const BorderRadius.all(
+                              decoration: const BoxDecoration(
+                                borderRadius: BorderRadius.all(
                                   Radius.circular(
                                     5.0,
                                   ),
                                 ),
-                                color: Theme.of(
-                                  context,
-                                ).hintColor,
+                                color: Colors.black,
                               ),
                               margin: const EdgeInsets.only(
                                 left: 15,
                               ),
-                              padding: const EdgeInsets.all(
-                                10,
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 10,
+                                horizontal: 20,
                               ),
                               child: Text(
                                 AppLocalizations.of(
@@ -247,6 +261,9 @@ class MarkerPlacementView extends StatelessWidget {
               ],
             ),
           ),
+        ),
+        const SizedBox(
+          height: 15,
         ),
       ],
     );

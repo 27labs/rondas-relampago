@@ -6,6 +6,8 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 export 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'ads_secrets.dart';
 
+import 'package:rondas_relampago/source/storage/storage.dart';
+
 enum AdKind { nativePlatform, mediumRectangleBanner, adaptiveBanner }
 
 typedef AdStore = ({
@@ -19,24 +21,36 @@ class AdsController {
 
   static bool? get adCategorySelected => _adCategorySelected;
 
-  static Future<void> limitAds() async {
+  static Future<void> limitAds(
+    SharedPreferences storage,
+  ) async {
+    _adCategorySelected = false;
     if (
         // !kDebugMode &&
         (Platform.isAndroid || Platform.isIOS))
       await MobileAds.instance.updateRequestConfiguration(RequestConfiguration(
         maxAdContentRating: MaxAdContentRating.g,
       ));
-    _adCategorySelected = false;
+    storage.setBool(
+      StoredValuesKeys.adRating.storageKey,
+      false,
+    );
   }
 
-  static Future<void> unlimitAds() async {
+  static Future<void> unlimitAds(
+    SharedPreferences storage,
+  ) async {
+    _adCategorySelected = true;
     if (
         // !kDebugMode &&
         (Platform.isAndroid || Platform.isIOS))
       await MobileAds.instance.updateRequestConfiguration(RequestConfiguration(
         maxAdContentRating: MaxAdContentRating.t,
       ));
-    _adCategorySelected = true;
+    storage.setBool(
+      StoredValuesKeys.adRating.storageKey,
+      true,
+    );
   }
 }
 
@@ -151,8 +165,13 @@ class PreloadedAds {
     }
   }
 
-  static Future<void> preloadSingleAd(AdKind adKind) async {
+  static Future<void> preloadSingleAd(
+    AdKind adKind, [
+    Function? onAdLoaded,
+  ]) async {
     const adRequest = AdRequest();
+
+    // bool loaded = false;
 
     switch (adKind) {
       case AdKind.nativePlatform:
@@ -171,6 +190,8 @@ class PreloadedAds {
                 // AdKind.nativePlatform,
               );
               debugPrint("Native Ad loaded.");
+              if (onAdLoaded != null) onAdLoaded();
+              // loaded = true;
             },
           ),
         )).load();
@@ -189,6 +210,8 @@ class PreloadedAds {
                 // AdKind.nativePlatform,
               );
               debugPrint("Banner Ad loaded.");
+              if (onAdLoaded != null) onAdLoaded();
+              // loaded = true;
             },
           ),
         )).load();
@@ -207,6 +230,8 @@ class PreloadedAds {
                 // AdKind.nativePlatform,
               );
               debugPrint("Banner Ad loaded.");
+              if (onAdLoaded != null) onAdLoaded();
+              // loaded = true;
             },
           ),
         )).load();

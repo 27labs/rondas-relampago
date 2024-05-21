@@ -1,6 +1,7 @@
 import 'dart:io';
 
 // import 'package:flutter/foundation.dart';
+import 'package:flutter/foundation.dart';
 import "package:flutter/material.dart";
 import 'package:go_router/go_router.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -13,16 +14,19 @@ import 'package:rondas_relampago/source/models/app_lifecycle/app_lifecycle.dart'
 import 'package:rondas_relampago/source/models/audio/audio_controller.dart';
 import 'package:rondas_relampago/source/models/themes/themes.dart';
 import 'package:rondas_relampago/source/pages/ads_requirements.dart';
-import 'package:rondas_relampago/source/pages/casual_singleplayer/match.dart';
-import 'package:rondas_relampago/source/pages/casual_singleplayer/tutorial.dart';
+import 'package:rondas_relampago/source/pages/casual/match.dart';
+import 'package:rondas_relampago/source/pages/casual/tutorial.dart';
 import 'package:rondas_relampago/source/pages/main_menu.dart';
+// import 'package:rondas_relampago/source/pages/room_selection.dart';
 // import 'package:rondas_relampago/source/pages/utils/change_notifiers.dart';
 // import 'package:rondas_relampago/source/pages/utils/providers.dart';
 import 'package:rondas_relampago/source/pages/utils/route_names.dart';
 import 'package:rondas_relampago/source/storage/storage.dart';
 
 class Relampago extends StatefulWidget {
+  final SharedPreferences storage;
   const Relampago({
+    required this.storage,
     super.key,
   });
 
@@ -32,12 +36,13 @@ class Relampago extends StatefulWidget {
 
 class RelampagoState extends State<Relampago> {
   late final AudioController _audioController = AudioController();
-  SharedPreferences? _storage;
+  // SharedPreferences? _storage;
   RGBThemes _activeTheme = RGBThemes.blue;
+  bool _userInteracted = false;
 
   GameAudioSettings _toggleMusic() {
     _audioController.toggleMusic(
-      _storage,
+      widget.storage,
     );
     return _audioController.sound;
   }
@@ -48,36 +53,41 @@ class RelampagoState extends State<Relampago> {
     setState(() {
       _activeTheme = theme;
     });
+    widget.storage.setInt(
+      StoredValuesKeys.selectedTheme.storageKey,
+      theme.index,
+    );
     return _activeTheme;
   }
 
   void _updateCasualScoreBy(
     int wins,
   ) =>
-      _storage!.setInt(
+      widget.storage.setInt(
           StoredValuesKeys.casualWins.storageKey,
-          (_storage?.getInt(
+          (widget.storage.getInt(
                     StoredValuesKeys.casualWins.storageKey,
                   ) ??
                   0) +
               1);
 
-  int? _getCasualWins() => _storage?.getInt(
+  int? _getCasualWins() => widget.storage.getInt(
         StoredValuesKeys.casualWins.storageKey,
       );
 
   void _initFromPersistentStorage() async {
-    _storage = await SharedPreferences.getInstance();
-    _audioController.initialize(switch (_storage!.getBool(
+    _audioController.initialize(switch (widget.storage.getBool(
       StoredValuesKeys.soundVolume.storageKey,
     )) {
       false => GameAudioSettings.soundOff,
-      _ => GameAudioSettings.soundOn
+      _ => GameAudioSettings.soundOn,
     });
-    _activeTheme = RGBThemes.values[_storage!.getInt(
-          StoredValuesKeys.selectedTheme.storageKey,
-        ) ??
-        RGBThemes.blue.index];
+    setState(() {
+      _activeTheme = RGBThemes.values[widget.storage.getInt(
+            StoredValuesKeys.selectedTheme.storageKey,
+          ) ??
+          RGBThemes.blue.index];
+    });
   }
 
   @override
@@ -94,9 +104,16 @@ class RelampagoState extends State<Relampago> {
             __,
           ) =>
               // !kDebugMode &&
-              (Platform.isAndroid || Platform.isIOS)
-                  ? AdsController.adCategorySelected == null
-                      ? const AdsRequirementsScreen()
+              !kIsWeb
+                  ? (Platform.isAndroid || Platform.isIOS)
+                      ? AdsController.adCategorySelected == null
+                          ? const AdsRequirementsScreen()
+                          : MainMenu(
+                              onThemeSelected: _changeTheme,
+                              onVolumeToggled: _toggleMusic,
+                              activeTheme: _activeTheme,
+                              getCasualWins: _getCasualWins,
+                            )
                       : MainMenu(
                           onThemeSelected: _changeTheme,
                           onVolumeToggled: _toggleMusic,
@@ -150,7 +167,7 @@ class RelampagoState extends State<Relampago> {
           ) =>
               CasualMatch(
             onVolumeToggled: _toggleMusic,
-            singleplayer: (updateCasualScoreBy: _updateCasualScoreBy),
+            singleplayer: (updateCasualScoreBy: _updateCasualScoreBy,),
           ),
         ),
         GoRoute(
@@ -164,6 +181,64 @@ class RelampagoState extends State<Relampago> {
             onVolumeToggled: _toggleMusic,
           ),
         ),
+        // GoRoute(
+        //   name: RouteNames.onlinePlay.name,
+        //   path: '/online',
+        //   redirect: (
+        //     _,
+        //     __,
+        //   ) =>
+        //       '/online/tutorial',
+        // ),
+        // GoRoute(
+        //   name: RouteNames.onlineRoomSelection.name,
+        //   path: '/online/room_selection',
+        //   builder: (
+        //     _,
+        //     __,
+        //   ) =>
+        //       OnlineRoomSelectionScreen(),
+        // ),
+        // GoRoute(
+        //   name: RouteNames.onlineCasualTutorial.name,
+        //   path: '/online/tutorial',
+        //   builder: (
+        //     _,
+        //     __,
+        //   ) =>
+        //       TutorialForCasual(
+        //     onVolumeToggled: _toggleMusic,
+        //     activeTheme: _activeTheme,
+        //   ),
+        // ),
+        // GoRoute(
+        //   name: RouteNames.onlineTwoPlayers.name,
+        //   path: '/online/twoplayer?room_id',
+        //   builder: (
+        //     _,
+        //     state,
+        //   ) =>
+        //       CasualOnlineMatch(
+        //     onVolumeToggled: _toggleMusic,
+        //     submittedRoomId: switch (state.uri.query) {
+        //       '' => null,
+        //       String query => query
+        //     }, // '5708e3a0-1465-1f8a-8ee6-692641652579',
+        //   ),
+        // ),
+        // GoRoute(
+        //   name: RouteNames.onlineTwoPlayersJoin.name,
+        //   path: '/online/twoplayer/:roomId',
+        //   builder: (
+        //     _,
+        //     state,
+        //   ) =>
+        //       CasualOnlineMatch(
+        //           onVolumeToggled: _toggleMusic,
+        //           submittedRoomId: state.pathParameters[
+        //               'roomId'] // '5708e3a0-1465-1f8a-8ee6-692641652579',
+        //           ),
+        // ),
       ],
     );
   }
@@ -174,7 +249,7 @@ class RelampagoState extends State<Relampago> {
   Widget build(
     _,
   ) {
-    if (
+    if (!kIsWeb) if (
         // !kDebugMode &&
         (Platform.isAndroid || Platform.isIOS)) {
       // PreloadedAds.initProviders(ref);
@@ -182,21 +257,51 @@ class RelampagoState extends State<Relampago> {
     return AppLifecycleObserver(
       audioController: _audioController,
       child: SafeArea(
-        child: MaterialApp.router(
-          title: '¡Rondas Relámpago!',
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
-          theme: ThemeData(
-            textTheme: GoogleFonts.lexendTextTheme(),
-            colorScheme: ColorScheme.fromSeed(
-              // brightness: Brightness.dark,
-              seedColor: _activeTheme.seedColor,
-            ).copyWith(
-              primary: Colors.amber,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            MaterialApp.router(
+              debugShowCheckedModeBanner: false,
+              title: '¡Rondas Relámpago!',
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              supportedLocales: AppLocalizations.supportedLocales,
+              theme: ThemeData(
+                textTheme: GoogleFonts.lexendTextTheme(),
+                snackBarTheme: SnackBarThemeData(
+                  // actionTextColor: Colors.amber,
+                  contentTextStyle:
+                      GoogleFonts.lexendTextTheme().labelSmall!.copyWith(
+                            color: Colors.amber,
+                          ),
+                  backgroundColor: _activeTheme.seedColor,
+                ),
+                colorScheme: ColorScheme.fromSeed(
+                  // brightness: Brightness.dark,
+                  seedColor: _activeTheme.seedColor,
+                ).copyWith(
+                  primary: Colors.amber,
+                ),
+                useMaterial3: true,
+              ),
+              routerConfig: _router,
             ),
-            useMaterial3: true,
-          ),
-          routerConfig: _router,
+            !_userInteracted
+                ? GestureDetector(
+                    onPanStart: (details) => setState(() async {
+                      _userInteracted = await _audioController.initialize(
+                          _audioController.sound, true);
+                    }),
+                    onTapDown: (details) => setState(() async {
+                      _userInteracted = await _audioController.initialize(
+                          _audioController.sound, true);
+                    }),
+                    child: const SizedBox(
+                      height: 1000,
+                      width: 1000,
+                    ),
+                  )
+                : const SizedBox()
+          ],
         ),
       ),
     );

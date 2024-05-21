@@ -1,0 +1,40 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "game_backend",
+      "cwd": "game_backend",
+      "request": "launch",
+      "type": "dart"
+    },
+    {
+      "name": "game_common",
+      "cwd": "game_common",
+      "request": "launch",
+      "type": "dart"
+    },
+    {
+      "name": "rondas_relampago",
+      "cwd": "rondas_relampago",
+      "request": "launch",
+      "type": "dart"
+    },
+    {
+      "name": "rondas_relampago (profile mode)",
+      "cwd": "rondas_relampago",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "profile"
+    },
+    {
+      "name": "rondas_relampago (release mode)",
+      "cwd": "rondas_relampago",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "release"
+    }
+  ]
+}

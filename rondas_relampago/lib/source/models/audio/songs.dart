@@ -6,8 +6,9 @@ const Set<Song> songs = {
   // Filenames with whitespace break package:audioplayers on iOS
   // (as of February 2022), so we use no whitespace.
   Song('RR-01_(Faded).wav', 'Jumpy', artist: 'Samuel Bidó'),
-  Song('RR-02+_(Faded).wav', 'Ham', artist: 'Samuel Bidó'),
-  Song('RR-01S.wav', 'Jumpy (w/ Bass)', artist: 'Samuel Bidó'),
+  Song('GYMKANA A.wav', 'Drift', artist: 'Samuel Bidó'),
+  // Song('RR-02+_(Faded).wav', 'Ham', artist: 'Samuel Bidó'),
+  // Song('RR-01S.wav', 'Jumpy (w/ Bass)', artist: 'Samuel Bidó'),
 };
 
 class Song {

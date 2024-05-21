@@ -16,11 +16,11 @@ import 'package:rondas_relampago/source/pages/utils/screen_title.dart';
 class TutorialForCasual extends StatelessWidget {
   final GameAudioSettings Function() onVolumeToggled;
   final RGBThemes activeTheme;
-  final bool multiplayer;
+  final bool? multiplayer;
   const TutorialForCasual({
     required this.onVolumeToggled,
     required this.activeTheme,
-    this.multiplayer = false,
+    this.multiplayer,
     super.key,
   });
 
@@ -213,10 +213,16 @@ class TutorialForCasual extends StatelessWidget {
             child: Focus(
               autofocus: true,
               child: TextButton(
+                style: ButtonStyle(
+                  overlayColor: MaterialStateProperty.all<Color>(
+                    Colors.transparent,
+                  ),
+                ),
                 onPressed: () => context.pushReplacementNamed(
                   switch (multiplayer) {
                     false => RouteNames.singlePlayer.name,
                     true => RouteNames.twoPlayers.name,
+                    null => RouteNames.onlineRoomSelection.name
                   },
                 ),
                 child: Container(
@@ -234,21 +240,25 @@ class TutorialForCasual extends StatelessWidget {
                     0,
                     35,
                   ),
-                  padding: const EdgeInsets.all(
-                    10,
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 10,
+                    horizontal: 20,
                   ),
-                  child: Text(
-                    AppLocalizations.of(
-                      context,
-                    )!
-                        .continueText,
-                    style: Theme.of(
-                      context,
-                    ).textTheme.headline6?.copyWith(
-                          color: Theme.of(
-                            context,
-                          ).colorScheme.primary,
-                        ),
+                  child: FittedBox(
+                    fit: BoxFit.contain,
+                    child: Text(
+                      AppLocalizations.of(
+                        context,
+                      )!
+                          .continueText,
+                      style: Theme.of(
+                        context,
+                      ).textTheme.headlineSmall?.copyWith(
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.primary,
+                          ),
+                    ),
                   ),
                 ),
               ),
