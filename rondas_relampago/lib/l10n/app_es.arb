@@ -1,7 +1,7 @@
 {
     "gameName": "¡Rondas Relámpago!",
     "gameHook": "¡El divertido juego rápido!",
-		"ageConfirmationTitleText": "Porfavor Confirma Tu Edad",
+		"ageConfirmationTitleText": "Porfavor Confirma Tu Año De Nacimiento",
 		"ageConfirmationNotice": "Porfavor confirma tu rango de edad aquí. Esto es por el único motivo de hacer que la aplicación te muestre contenido acorde a tu edad. Debes presionar (Aceptar) si: por lo menos alcanzaste la adolecencia, y tienes el concentimiento de tus tutores cuando aplique. Para los otros casos presiona (No).",
 		"confirmYoungerText": "No",
 		"confirmOlderText": "Aceptar",

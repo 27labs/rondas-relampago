@@ -117,7 +117,7 @@ class MainMenuState extends State<MainMenu> {
                           context,
                         )!
                             .onlineCasualMode,
-                        route: null, // RouteNames.onlinePlay.name,
+                        route: RouteNames.onlinePlay.name,
                         color: Colors.black,
                       ),
                     ),
@@ -145,7 +145,7 @@ class MainMenuState extends State<MainMenu> {
                   Colors.transparent,
                 ),
                 fixedSize: WidgetStateProperty.all<Size>(
-                  Size(164, 10),
+                  const Size(280, 10),
                 ),
               ),
               onPressed: () {
@@ -420,7 +420,8 @@ class _AdSectionState extends State<_AdSection> {
   @override
   Widget build(
     context,
-  ) => // kDebugMode ||
+  ) =>
+      // kDebugMode ||
       !kIsWeb
           ? !(Platform.isAndroid || Platform.isIOS)
               ? const SizedBox()

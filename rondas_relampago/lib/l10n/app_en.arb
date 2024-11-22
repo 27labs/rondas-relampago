@@ -1,7 +1,7 @@
 {
     "gameName": "Lightning Rounds!",
     "gameHook": "The quick and fun game!",
-		"ageConfirmationTitleText": "Please Confirm Your Age",
+		"ageConfirmationTitleText": "Please Confirm Your Birth Year",
 		"ageConfirmationNotice": "Please confirm your age range here. This is for the sole purpose of the application presenting you age appropriate content. You must hit (Accept) if you: at least are of teen age and have the consent of your guardian if applicable. Otherwise hit (No).",
 		"confirmYoungerText": "No",
 		"confirmOlderText": "Accept",

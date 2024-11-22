@@ -3,7 +3,7 @@ description: "The quick and fun game!"
 
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
-version: 5.0.0+17
+version: 5.0.0+19
 
 environment:
   sdk: '>=3.3.1 <4.0.0'
@@ -18,7 +18,7 @@ dependencies:
   go_router: ^13.2.1
   flutter_localization: ^0.2.0
   intl: any
-  url_launcher: ^6.2.5
+  url_launcher: ^6.3.0
   shared_preferences: ^2.2.2
   audioplayers: ^6.0.0
   google_fonts: ^6.2.1

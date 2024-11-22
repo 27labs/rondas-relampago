@@ -97,7 +97,7 @@ class CasualOnlineMatchState extends State<CasualOnlineMatch> {
         (
           await http.get(
             Uri.parse(
-              'http://10.0.0.5:8080/',
+              'http://127.0.0.1:8080/',
             ),
           ),
         ).toString(),
@@ -112,7 +112,7 @@ class CasualOnlineMatchState extends State<CasualOnlineMatch> {
     _pingServer();
     _serverConnection = WebSocketChannel.connect(
       Uri.parse(
-        'ws://10.0.0.5:8080/ws',
+        'ws://127.0.0.1:8080/ws',
       ),
     )..sink.add(
         jsonEncode(

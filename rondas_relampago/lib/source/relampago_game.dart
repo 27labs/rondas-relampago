@@ -17,7 +17,7 @@ import 'package:rondas_relampago/source/pages/ads_requirements.dart';
 import 'package:rondas_relampago/source/pages/casual/match.dart';
 import 'package:rondas_relampago/source/pages/casual/tutorial.dart';
 import 'package:rondas_relampago/source/pages/main_menu.dart';
-// import 'package:rondas_relampago/source/pages/room_selection.dart';
+import 'package:rondas_relampago/source/pages/room_selection.dart';
 // import 'package:rondas_relampago/source/pages/utils/change_notifiers.dart';
 // import 'package:rondas_relampago/source/pages/utils/providers.dart';
 import 'package:rondas_relampago/source/pages/utils/route_names.dart';
@@ -103,8 +103,7 @@ class RelampagoState extends State<Relampago> {
             _,
             __,
           ) =>
-              // !kDebugMode &&
-              !kIsWeb
+              !kDebugMode && !kIsWeb
                   ? (Platform.isAndroid || Platform.isIOS)
                       ? AdsController.adCategorySelected == null
                           ? const AdsRequirementsScreen()
@@ -181,36 +180,36 @@ class RelampagoState extends State<Relampago> {
             onVolumeToggled: _toggleMusic,
           ),
         ),
-        // GoRoute(
-        //   name: RouteNames.onlinePlay.name,
-        //   path: '/online',
-        //   redirect: (
-        //     _,
-        //     __,
-        //   ) =>
-        //       '/online/tutorial',
-        // ),
-        // GoRoute(
-        //   name: RouteNames.onlineRoomSelection.name,
-        //   path: '/online/room_selection',
-        //   builder: (
-        //     _,
-        //     __,
-        //   ) =>
-        //       OnlineRoomSelectionScreen(),
-        // ),
-        // GoRoute(
-        //   name: RouteNames.onlineCasualTutorial.name,
-        //   path: '/online/tutorial',
-        //   builder: (
-        //     _,
-        //     __,
-        //   ) =>
-        //       TutorialForCasual(
-        //     onVolumeToggled: _toggleMusic,
-        //     activeTheme: _activeTheme,
-        //   ),
-        // ),
+        GoRoute(
+          name: RouteNames.onlinePlay.name,
+          path: '/online',
+          redirect: (
+            _,
+            __,
+          ) =>
+              '/online/tutorial',
+        ),
+        GoRoute(
+          name: RouteNames.onlineRoomSelection.name,
+          path: '/online/room_selection',
+          builder: (
+            _,
+            __,
+          ) =>
+              OnlineRoomSelectionScreen(),
+        ),
+        GoRoute(
+          name: RouteNames.onlineCasualTutorial.name,
+          path: '/online/tutorial',
+          builder: (
+            _,
+            __,
+          ) =>
+              TutorialForCasual(
+            onVolumeToggled: _toggleMusic,
+            activeTheme: _activeTheme,
+          ),
+        ),
         // GoRoute(
         //   name: RouteNames.onlineTwoPlayers.name,
         //   path: '/online/twoplayer?room_id',
@@ -226,19 +225,21 @@ class RelampagoState extends State<Relampago> {
         //     }, // '5708e3a0-1465-1f8a-8ee6-692641652579',
         //   ),
         // ),
-        // GoRoute(
-        //   name: RouteNames.onlineTwoPlayersJoin.name,
-        //   path: '/online/twoplayer/:roomId',
-        //   builder: (
-        //     _,
-        //     state,
-        //   ) =>
-        //       CasualOnlineMatch(
-        //           onVolumeToggled: _toggleMusic,
-        //           submittedRoomId: state.pathParameters[
-        //               'roomId'] // '5708e3a0-1465-1f8a-8ee6-692641652579',
-        //           ),
-        // ),
+        GoRoute(
+          name: RouteNames.onlineTwoPlayersJoin.name,
+          path: '/online/twoplayer/:roomId',
+          builder: (
+            _,
+            state,
+          ) =>
+              CasualOnlineMatch(
+            onVolumeToggled: _toggleMusic,
+            submittedRoomId: switch (state.pathParameters['roomId']) {
+              null => null,
+              _ => state.pathParameters['roomId'],
+            }, // '5708e3a0-1465-1f8a-8ee6-692641652579',
+          ),
+        ),
       ],
     );
   }

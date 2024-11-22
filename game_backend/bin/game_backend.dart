@@ -39,158 +39,167 @@ void _webSocketHandler(
     () => null,
   );
 
-  channel.stream.listen((
-    envoy,
-  ) {
-    print(envoy);
-    final message = GameCommunicationMessage.fromJson(
-      jsonDecode(
-        envoy,
-      ),
-    );
+  channel.stream.listen(
+    (
+      envoy,
+    ) {
+      print(envoy);
+      final message = GameCommunicationMessage.fromJson(
+        jsonDecode(
+          envoy,
+        ),
+      );
 
-    if (message is ConnectionMessage) {
-      try {
-        UuidValue.withValidation(
-          message.id.roomId.toString(),
-          ValidationMode.strictRFC4122,
-        );
-        connections[channel] = message.id;
-        rooms.joinRoom(
-          message.id,
-          room: UuidValue.fromString(
-            message.id.roomId!,
-          ),
-          channel: channel,
-        );
-        channel.sink.add(
-          jsonEncode(
-            GameCommunicationMessage.toJson(
-              ConnectionMessage(
-                id: message.id,
+      if (message is ConnectionMessage) {
+        try {
+          UuidValue.withValidation(
+            message.id.roomId.toString(),
+            ValidationMode.strictRFC4122,
+          );
+          connections[channel] = message.id;
+          rooms.joinRoom(
+            message.id,
+            room: UuidValue.fromString(
+              message.id.roomId!,
+            ),
+            channel: channel,
+          );
+          channel.sink.add(
+            jsonEncode(
+              GameCommunicationMessage.toJson(
+                ConnectionMessage(
+                  id: message.id,
+                ),
               ),
             ),
-          ),
-        );
-      } on FormatException {
-        final roomId = UuidValue.fromString(
-          UuidV1().generate().toString(),
-        );
-        final newId = message.id.copyWith(
-          roomId: roomId.toFormattedString(),
-        );
-        connections[channel] = newId;
-        rooms.joinRoom(
-          newId,
-          room: roomId,
-          channel: channel,
-        );
-        channel.sink.add(
-          jsonEncode(
-            GameCommunicationMessage.toJson(
-              ConnectionMessage(
-                id: newId,
+          );
+        } on FormatException {
+          final roomId = UuidValue.fromString(
+            UuidV1().generate().toString(),
+          );
+          final newId = message.id.copyWith(
+            roomId: roomId.toFormattedString(),
+          );
+          connections[channel] = newId;
+          rooms.joinRoom(
+            newId,
+            room: roomId,
+            channel: channel,
+          );
+          channel.sink.add(
+            jsonEncode(
+              GameCommunicationMessage.toJson(
+                ConnectionMessage(
+                  id: newId,
+                ),
               ),
             ),
-          ),
-        );
+          );
+        }
+
+        // _analyticsService(query: {
+        //   'connection': null,
+        //   'time': DateTime.now().weekday.toString(),
+        // });
       }
 
-      // _analyticsService(query: {
-      //   'connection': null,
-      //   'time': DateTime.now().weekday.toString(),
-      // });
-    }
-
-    if (message is MatchMessage) {
-      final senderId = connections[channel];
-      if (senderId?.roomId != null) {
-        rooms
-            .getOtherUsers(
-          UuidValue.fromString(
-            senderId!.roomId!,
-          ),
-        )
-            .forEach(
-          (
-            element,
-          ) {
-            if (element.$1 !=
-                UuidValue.fromString(
-                  senderId.id,
-                ))
-              element.$2!.sink.add(
-                jsonEncode(
-                  GameCommunicationMessage.toJson(
-                    message,
+      if (message is MatchMessage) {
+        final senderId = connections[channel];
+        if (senderId?.roomId != null) {
+          rooms
+              .getOtherUsers(
+            UuidValue.fromString(
+              senderId!.roomId!,
+            ),
+          )
+              .forEach(
+            (
+              element,
+            ) {
+              if (element.$1 !=
+                  UuidValue.fromString(
+                    senderId.id,
+                  ))
+                element.$2!.sink.add(
+                  jsonEncode(
+                    GameCommunicationMessage.toJson(
+                      message,
+                    ),
                   ),
-                ),
-              );
-          },
-        );
+                );
+            },
+          );
+        }
       }
-    }
 
-    if (message is MatchPlayMessage) {
-      final senderId = connections[channel];
+      if (message is MatchPlayMessage) {
+        final senderId = connections[channel];
 
-      if (senderId != null) {
-        switch (rooms.setPlayerPlay(
-          senderId,
-          2,
-          units: message.playerPlay.units,
-          markers: message.playerPlay.markers,
-        )) {
-          case List<
-                ({
-                  Set<GameMarker> markers,
-                  UuidValue playerId,
-                  MatchUnits units
-                })> plays:
-            if (senderId.roomId != null) {
-              rooms
-                  .getOtherUsers(
-                UuidValue.fromString(
-                  senderId.roomId!,
-                ),
-              )
-                  .forEach(
-                (
-                  element,
-                ) {
-                  // if (element.$1 !=
-                  //     UuidValue.fromString(
-                  //       senderId.id,
-                  //     )) {
-                  element.$2!.sink.add(
-                    jsonEncode(
-                      GameCommunicationMessage.toJson(
-                        ServerPlayMessage(
-                          player1Play: (
-                            markers: plays[0].markers,
-                            units: plays[0].units,
-                            id: plays[0].playerId.uuid,
-                          ),
-                          player2Play: (
-                            markers: plays[1].markers,
-                            units: plays[1].units,
-                            id: plays[1].playerId.uuid,
+        if (senderId != null) {
+          switch (rooms.setPlayerPlay(
+            senderId,
+            2,
+            units: message.playerPlay.units,
+            markers: message.playerPlay.markers,
+          )) {
+            case List<
+                  ({
+                    Set<GameMarker> markers,
+                    UuidValue playerId,
+                    MatchUnits units
+                  })> plays:
+              if (senderId.roomId != null) {
+                rooms
+                    .getOtherUsers(
+                  UuidValue.fromString(
+                    senderId.roomId!,
+                  ),
+                )
+                    .forEach(
+                  (
+                    element,
+                  ) {
+                    // if (element.$1 !=
+                    //     UuidValue.fromString(
+                    //       senderId.id,
+                    //     )) {
+                    element.$2!.sink.add(
+                      jsonEncode(
+                        GameCommunicationMessage.toJson(
+                          ServerPlayMessage(
+                            player1Play: (
+                              markers: plays[0].markers,
+                              units: plays[0].units,
+                              id: plays[0].playerId.uuid,
+                            ),
+                            player2Play: (
+                              markers: plays[1].markers,
+                              units: plays[1].units,
+                              id: plays[1].playerId.uuid,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  );
-                  // }
-                },
-              );
-            }
-            break;
-          default:
-            break;
+                    );
+                    // }
+                  },
+                );
+              }
+              break;
+            default:
+              break;
+          }
         }
       }
-    }
-  });
+    },
+    onDone: () {
+      if (connections[channel] != null) {
+        final GameAuth id = connections[channel]!;
+        rooms.disconnectPlayer(GameAuthWithChannel(id, channel: channel));
+        connections.remove(channel);
+      }
+    },
+  );
 }
 
 void main(List<String> args) async {

@@ -2,12 +2,12 @@ import 'dart:io';
 // import 'package:flutter/foundation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:rondas_relampago/source/models/gameplay/game_units/paints.dart';
 
 // Owned
 import 'source/relampago_game.dart';
 import 'package:rondas_relampago/source/models/ads/ads.dart';
 import 'package:rondas_relampago/source/storage/storage.dart';
+import 'package:rondas_relampago/source/models/gameplay/game_units/paints.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -29,11 +29,15 @@ void main() async {
             StoredValuesKeys.adRating.storageKey,
           )) {
             case true:
-              await AdsController.unlimitAds(storage);
+              await AdsController.unlimitAds(
+                storage,
+              );
               // PreloadedAds.preloadSingleAd(AdKind.nativePlatform);
               break;
             case false:
-              await AdsController.limitAds(storage);
+              await AdsController.limitAds(
+                storage,
+              );
               // PreloadedAds.preloadSingleAd(AdKind.nativePlatform);
               break;
             case null:

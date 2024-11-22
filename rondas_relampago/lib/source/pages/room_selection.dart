@@ -28,10 +28,10 @@ class OnlineRoomSelectionScreen extends StatelessWidget {
 
     if (roomId.isEmpty) {
       context.pushReplacementNamed(
-        RouteNames.onlineTwoPlayers.name,
-        // pathParameters: {
-        //   'roomId': null.toString(),
-        // },
+        RouteNames.onlineTwoPlayersJoin.name,
+        pathParameters: {
+          'roomId': null.toString(),
+        },
       );
     }
 

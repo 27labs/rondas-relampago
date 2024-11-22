@@ -31,6 +31,30 @@ class GameRoomPool {
         Set<GameAuthWithChannel>
       )> _activeRooms = {};
 
+  void disconnectPlayer(GameAuthWithChannel id) {
+    print(id.id.toJson());
+
+    final UuidValue roomId;
+
+    if (id.id.roomId != null) {
+      roomId = UuidValue.fromString(id.id.roomId!);
+    } else {
+      return;
+    }
+
+    _activeRooms[roomId]?.$2.forEach((id) {
+      print(id.id.toJson());
+    });
+
+    _activeRooms[roomId]?.$2.removeWhere((player) => id.id.id == player.id.id);
+
+    if (_activeRooms[roomId]?.$2.isEmpty ?? false) {
+      _activeRooms.remove(roomId);
+    }
+
+    print(_activeRooms[roomId]?.$2);
+  }
+
   void addRooms(
     List<
             (
