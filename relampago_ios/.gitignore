@@ -41,16 +41,3 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
-
-# User added
-/android/*
-/ios/*
-/macos/*
-
-/test/*
-
-*.g.dart
-
-.vscode/*
-
-assets/*
